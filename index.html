@@ -3,119 +3,931 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#171717">
-<meta name="description" content="집에서 첫 셔츠를 빨아 동네 세탁소를 여는 경영 게임. 현재 기획 단계, 다음 할 일, 확정 규칙과 변경 이력을 확인하세요.">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="집에서 첫 셔츠를 빨아 동네 세탁소를 여는 경영 게임. 기획이 지금 어느 단계인지, 다음에 무엇을 정할지, 지금까지 정한 규칙과 변경 이력을 확인하세요.">
 <title>세탁소 기획 장부</title>
 <style>
+/* 흑백 장부. 상태는 색 대신 동그라미가 찬 정도로 보여 준다: 꽉 참(많이 됨), 반(일부만), 빈 원(비어 있음), 점선(나중). */
 :root {
   color-scheme: light;
-  --ink: #171717;
-  --muted: #545454;
-  --line: #cecece;
-  --wash: #f5f5f3;
+  --ink: #111;
   --paper: #fff;
-  font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --wash: #f4f4f1;
+  --soft: #e6e6e1;
+  --line: #c8c8c2;
+  --muted: #575757;
+  --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 * { box-sizing: border-box; }
-html { scroll-padding-top: 1rem; }
-body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
-header, main, footer { width: min(1040px, 100% - 48px); margin-inline: auto; }
-header, footer, nav, .section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-header { border-bottom: 1px solid var(--ink); padding: 12px 0; }
-nav { justify-content: flex-start; gap: 1.25rem; font-size: .86rem; }
-a { color: inherit; text-underline-offset: .25em; }
-nav a { display: inline-flex; align-items: center; min-height: 40px; text-decoration: none; }
-a:hover, summary:hover { text-decoration: underline; }
-a:focus-visible, summary:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
-.skip { position: absolute; left: 1rem; top: -6rem; background: white; padding: .4rem; }
+html { scroll-padding-top: 4.75rem; }
+body { margin: 0; color: var(--ink); background: var(--paper); font: 400 1.0625rem/1.75 var(--font); word-break: keep-all; overflow-wrap: anywhere; -webkit-text-size-adjust: 100%; }
+h1, h2, h3, h4, p, ol, ul, dl, dd, figure { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+h1, h2, h3, h4 { line-height: 1.3; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); font-weight: 800; }
+h2 { font-size: 1.45rem; font-weight: 800; }
+h3 { font-size: 1.125rem; font-weight: 700; }
+h4 { font-size: 1rem; font-weight: 700; }
+p, dd { max-width: 40em; }
+a { color: inherit; text-underline-offset: .22em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+small, .small { font-size: .875rem; }
+code { font-family: inherit; font-size: .92em; background: var(--wash); border: 1px solid var(--line); border-radius: 4px; padding: .02em .35em; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.skip { position: absolute; left: 1rem; top: -6rem; background: var(--paper); padding: .5rem .8rem; border: 2px solid var(--ink); z-index: 9; }
 .skip:focus { top: .5rem; }
-h1, h2, h3, p, ol, dl, dd { margin: 0; }
-h1, h2, h3 { text-wrap: balance; line-height: 1.28; }
-h1 { font-size: clamp(2.3rem, 6vw, 4rem); letter-spacing: -.075em; }
-h2 { font-size: clamp(1.4rem, 3.4vw, 2rem); letter-spacing: -.065em; }
-h3 { font-size: 1.09rem; letter-spacing: -.04em; }
-.hero { padding: 32px 0 24px; }
-.hero p { max-width: 57ch; margin-top: 10px; }
-.updated, .state, .log time, footer { font-size: .83rem; color: var(--muted); }
-section { margin: 0 0 38px; }
-.section-head, .heading { margin-bottom: 14px; }
-.flow { display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; padding: 0; border-block: 1px solid var(--ink); }
-.flow li { padding: 12px; display: grid; gap: 3px; align-content: start; }
-.flow strong { line-height: 1.35; }
-.flow li + li { border-left: 1px solid var(--line); }
-.flow small { font-size: .78rem; }
-.flow [aria-current] { background: var(--ink); color: white; }
-.next { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem 1rem; background: var(--wash); padding: 12px 15px; }
-.next b { font-size: .84rem; }
-.tasks { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
-.task { padding: 16px 18px; border: 1px solid var(--line); border-top: 3px solid var(--ink); border-radius: 0 0 8px 8px; }
-.task .state { display: block; margin-bottom: 6px; }
-.task p { margin: .5rem 0; font-size: .94rem; }
-.task a { display: inline-block; padding-block: .4rem; font-size: .88rem; }
-.record, .log { display: grid; grid-template-columns: minmax(140px,29%) 1fr; gap: 22px; border-top: 1px solid var(--line); padding: 16px 0; }
-.record:target, .task:target { outline: 2px solid var(--ink); outline-offset: 3px; }
-summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-weight: 700; font-size: .91rem; }
-details { margin-top: 3px; }
-.inside { background: var(--wash); padding: 14px 16px; font-size: .94rem; border-radius: 4px; }
-.inside dt { font-weight: bold; }
-.inside dd + dt { margin-top: 8px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-caption, th, td { text-align: left; }
-td, th { padding: .3rem .5rem; border-bottom: 1px solid var(--line); }
-.week { padding: 0; list-style: none; }
-.week li { margin-bottom: .5rem; }
+.in, main, footer { width: min(1000px, 100% - 40px); margin-inline: auto; }
+
+/* 맨 위 띠 */
+.bar { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 2px solid var(--ink); }
+.bar .in { display: flex; align-items: center; gap: .75rem; min-height: 58px; }
+.brand { font-weight: 800; text-decoration: none; white-space: nowrap; }
+.bar nav { display: flex; gap: .15rem; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.bar nav a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 .75rem; border-radius: 999px; text-decoration: none; font-size: .9375rem; white-space: nowrap; }
+.bar nav a:hover { background: var(--wash); }
+.bar nav a[aria-current] { background: var(--ink); color: var(--paper); }
+
+/* 화면 하나가 section.view 하나. 스크립트가 켜지면 한 번에 하나만 보인다. */
+.view { display: flex; flex-direction: column; gap: 1.6rem; padding: 2rem 0 3.5rem; border-top: 1px solid var(--line); }
+.view:first-child { border-top: 0; }
+.js .view { display: none; border-top: 0; }
+.js .view.on { display: flex; }
+.view > section { display: flex; flex-direction: column; gap: .9rem; }
+.lead { font-size: 1.1875rem; }
+.kicker { font-size: .875rem; font-weight: 700; color: var(--muted); }
+.crumb a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; text-decoration: none; }
+.crumb a::before { content: "←"; margin-right: .4rem; }
+.crumb a:hover { text-decoration: underline; }
+
+/* 상태 동그라미와 꼬리표 */
+.st { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; border-radius: 50%; vertical-align: -.14em; flex: none; }
+.st.done { background: currentColor; }
+.st.part { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.st.later { border-style: dashed; opacity: .55; }
+.tags { display: flex; flex-wrap: wrap; gap: .35rem; max-width: none; }
+.tag { display: inline-flex; align-items: center; gap: .3em; font-size: .8125rem; font-weight: 700; line-height: 1; padding: .42em .65em; border: 1.5px solid var(--ink); border-radius: 999px; text-decoration: none; white-space: nowrap; background: var(--paper); color: var(--ink); }
+.tag.solid { background: var(--ink); color: var(--paper); }
+.tag.dash { border-style: dashed; font-weight: 500; }
+a.tag:hover { background: var(--wash); }
+.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; font-size: .9375rem; color: var(--muted); max-width: none; }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.legend .st { color: var(--ink); }
+
+/* 첫 화면 */
+.now { border: 2px solid var(--ink); border-radius: 16px; padding: 1.4rem 1.5rem; display: grid; gap: .75rem; box-shadow: 6px 6px 0 var(--ink); margin-right: 6px; }
+.now-label { justify-self: start; background: var(--ink); color: var(--paper); font-size: .875rem; font-weight: 700; padding: .2rem .65rem; border-radius: 5px; }
+.now h2 { font-size: 1.7rem; }
+.acts { display: flex; flex-wrap: wrap; gap: .6rem; }
+.btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; padding: 0 1.15rem; border: 2px solid var(--ink); border-radius: 10px; font-weight: 700; text-decoration: none; background: var(--paper); }
+.btn::after { content: "→"; }
+.btn:hover { background: var(--wash); }
+.btn.solid { background: var(--ink); color: var(--paper); }
+.btn.solid:hover { background: #333; }
+.say { background: var(--wash); border-radius: 10px; padding: .75rem 1rem; font-size: .9375rem; max-width: none; }
+.say q { font-weight: 700; quotes: "“" "”"; }
+.updated { font-size: .875rem; color: var(--muted); }
+
+.map { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; }
+.map li { position: relative; }
+.map li + li { border-left: 1px solid var(--line); }
+.map a { display: flex; flex-direction: column; gap: .3rem; height: 100%; min-height: 150px; padding: .9rem .7rem 1rem; text-decoration: none; }
+.map a:hover { background: var(--wash); }
+.map .st { font-size: 1.6rem; margin-bottom: .35rem; }
+.map .num { font-size: .8125rem; font-weight: 700; color: var(--muted); }
+.map strong { font-size: 1rem; line-height: 1.35; }
+.map small { margin-top: auto; font-size: .8125rem; color: var(--muted); }
+.map a[aria-current] { background: var(--ink); color: var(--paper); }
+.map a[aria-current] .num, .map a[aria-current] small { color: inherit; }
+.flag { position: absolute; top: .65rem; right: .5rem; font-style: normal; font-size: .75rem; font-weight: 800; background: var(--paper); color: var(--ink); padding: .1rem .4rem; border-radius: 4px; }
+
+.howto { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; counter-reset: how; }
+.howto li { counter-increment: how; border: 1.5px dashed var(--ink); border-radius: 12px; padding: .9rem 1rem; font-size: .9375rem; line-height: 1.65; display: grid; gap: .2rem; }
+.howto li::before { content: counter(how); font-weight: 800; font-size: 1.3rem; line-height: 1; }
+.howto b { font-size: 1rem; }
+
+.tasks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.task { border: 1.5px solid var(--ink); border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .45rem; scroll-margin-top: 5rem; }
+.task p { font-size: .9375rem; line-height: 1.65; }
+.task > a { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; min-height: 40px; font-size: .9375rem; font-weight: 700; }
+
+.doors { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
+.door { display: flex; flex-direction: column; gap: .3rem; min-height: 128px; border: 1.5px solid var(--ink); border-radius: 12px; padding: 1rem; text-decoration: none; }
+.door:hover { background: var(--wash); }
+.door b { font-size: 1.0625rem; line-height: 1.4; }
+.door span { font-size: .875rem; color: var(--muted); line-height: 1.5; }
+.door::after { content: "→"; margin-top: auto; font-weight: 800; }
+
+/* 단계 화면 */
+.stage-no { display: flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .9375rem; }
+.plain { font-size: 1.1875rem; border-left: 5px solid var(--ink); padding-left: .9rem; }
+.cols2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.panel { border: 1.5px solid var(--ink); border-radius: 12px; padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
+.panel.todo { border-style: dashed; }
+.ticks { display: grid; gap: .55rem; }
+.ticks li, .qlist li { position: relative; padding-left: 1.85rem; font-size: .9688rem; line-height: 1.65; }
+.ticks li::before, .qlist li::before { content: ""; position: absolute; left: 0; top: .33rem; width: 1.05rem; height: 1.05rem; border: 2px solid var(--ink); border-radius: 3px; }
+.ticks.yes li::before { content: "✓"; display: grid; place-items: center; background: var(--ink); color: var(--paper); font-size: .7rem; font-weight: 800; line-height: 1; }
+.ticks a { font-weight: 700; }
+.pager { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; border-top: 1px solid var(--line); padding-top: 1.25rem; }
+.pager a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1rem; border: 1.5px solid var(--ink); border-radius: 10px; font-weight: 700; text-decoration: none; }
+.pager a:hover { background: var(--wash); }
+
+/* 그림 */
+.fig { border: 2px solid var(--ink); border-radius: 16px; padding: 1.25rem; display: grid; gap: 1rem; }
+.fig figcaption { font-size: .9375rem; color: var(--muted); max-width: 44em; }
+.fig-t { font-weight: 800; font-size: .9375rem; max-width: none; }
+.chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem; }
+.box { flex: 1 1 8.5rem; border: 1.5px solid var(--ink); border-radius: 10px; padding: .7rem .8rem; display: flex; flex-direction: column; gap: .2rem; font-size: .9375rem; line-height: 1.55; background: var(--paper); }
+.box b { font-size: 1rem; }
+.box small { color: var(--muted); }
+.box small .st { color: var(--ink); }
+.box.hole { border-style: dashed; background: repeating-linear-gradient(-45deg, transparent 0 7px, var(--soft) 7px 8px); }
+.box.inv { background: var(--ink); color: var(--paper); }
+.box.inv small { color: inherit; opacity: .8; }
+.box.screen::before { content: ""; height: 6px; width: 40%; background: var(--ink); border-radius: 3px; margin-bottom: .3rem; }
+.arr { flex: none; align-self: center; font-weight: 800; font-size: 1.2rem; line-height: 1; }
+.ring { border: 2px solid var(--ink); border-radius: 20px; padding: 1rem 1.1rem; display: grid; gap: .6rem; }
+.ring > p { max-width: none; font-size: .9375rem; }
+.ring .ring-t { font-weight: 800; font-size: 1rem; display: flex; align-items: baseline; flex-wrap: wrap; gap: .5rem; }
+.ring-t small { font-weight: 500; color: var(--muted); }
+.ring.core { background: var(--ink); color: var(--paper); }
+.ring.core small { color: inherit; opacity: .8; }
+.stairs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: end; gap: .5rem; }
+.stairs .box { border-radius: 10px 10px 0 0; }
+.stairs .box:nth-child(1) { min-height: 6.5rem; }
+.stairs .box:nth-child(2) { min-height: 9rem; }
+.stairs .box:nth-child(3) { min-height: 11.5rem; }
+.stairs .box:nth-child(4) { min-height: 14rem; }
+.temple { display: grid; gap: .4rem; max-width: 30rem; }
+.roof { background: var(--ink); color: var(--paper); text-align: center; font-weight: 800; padding: 1.9rem .5rem .6rem; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; padding: 0 1.2rem; }
+.pillars div { border: 1.5px dashed var(--ink); border-radius: 4px; min-height: 6rem; display: grid; place-items: center; text-align: center; font-size: .875rem; line-height: 1.5; padding: .4rem; }
+.floor { border-top: 4px solid var(--ink); text-align: center; font-size: .875rem; color: var(--muted); padding-top: .4rem; max-width: none; }
+.slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; }
+.slots div { padding: .8rem; display: flex; flex-direction: column; gap: .25rem; font-size: .9rem; line-height: 1.55; }
+.slots div + div { border-left: 1px solid var(--line); }
+.slots small { color: var(--muted); }
+.dgwrap { overflow-x: auto; }
+.dg { display: block; width: 100%; min-width: 700px; height: auto; font-family: var(--font); }
+.dg rect { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+.dg rect.sink { fill: var(--wash); stroke-dasharray: 5 4; }
+.dg .ln { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.dg .lp { fill: none; stroke: var(--ink); stroke-width: 3.5; }
+.dg marker path { fill: var(--ink); }
+.dg .t { font-size: 14px; font-weight: 700; fill: var(--ink); }
+.dg .s { font-size: 12px; fill: var(--muted); }
+.dg .l { font-size: 12.5px; fill: var(--ink); }
+.dg .ll { font-size: 12.5px; font-weight: 800; fill: var(--ink); }
+.dg a { cursor: pointer; }
+.dg a:hover rect, .dg a:focus rect { fill: var(--wash); stroke-width: 3; }
+
+/* 표 */
+.scroll { overflow-x: auto; border: 1.5px solid var(--ink); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: .9375rem; line-height: 1.65; }
+th, td { text-align: left; vertical-align: top; padding: .7rem .9rem; border-bottom: 1px solid var(--line); }
+tbody tr:last-child > * { border-bottom: 0; }
+thead th { font-size: .8125rem; color: var(--muted); background: var(--wash); white-space: nowrap; }
+caption { text-align: left; padding: 0 0 .5rem; font-weight: 700; }
+.qa th[scope="row"] { white-space: nowrap; }
+.qa td:last-child { white-space: nowrap; }
+
+/* 한 벌의 여정 */
+.strip { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.strip a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 .8rem; border: 1.5px solid var(--ink); border-radius: 999px; font-size: .9375rem; font-weight: 700; text-decoration: none; }
+.strip a:hover { background: var(--wash); }
+.strip span { font-weight: 800; }
+.journey li { position: relative; display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 1rem; padding-bottom: 1.1rem; scroll-margin-top: 5rem; }
+.journey li::before { content: ""; position: absolute; left: calc(1.3rem - 1px); top: 2.6rem; bottom: 0; width: 2px; background: var(--ink); }
+.journey li:last-child::before { display: none; }
+.jn { width: 2.6rem; height: 2.6rem; border: 2px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--paper); position: relative; }
+.jbody { border: 1.5px solid var(--ink); border-radius: 12px; padding: .9rem 1rem; display: grid; gap: .5rem; }
+.kv { display: grid; grid-template-columns: 5.4rem minmax(0, 1fr); gap: .2rem .7rem; font-size: .9375rem; line-height: 1.6; }
+.kv dt { font-weight: 700; color: var(--muted); }
+.kv dd { max-width: none; }
+.sys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.sys > div { border: 1.5px solid var(--ink); border-radius: 12px; padding: .9rem 1rem; display: grid; gap: .35rem; font-size: .9375rem; line-height: 1.65; scroll-margin-top: 5rem; }
+.sys dt { font-weight: 800; font-size: 1rem; }
+
+/* 장부 */
+.index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1.5rem; }
+.index a { display: flex; align-items: center; gap: .55rem; min-height: 40px; font-weight: 700; text-decoration: none; }
+.index a:hover { text-decoration: underline; }
+.group { display: flex; flex-direction: column; gap: .75rem; scroll-margin-top: 5rem; }
+.record { border: 1.5px solid var(--ink); border-radius: 14px; padding: 1.2rem 1.3rem; display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: .6rem 1.5rem; scroll-margin-top: 5rem; }
+.record header { display: flex; flex-direction: column; gap: .55rem; }
+.record > div { display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.hit { outline: 3px solid var(--ink); outline-offset: 4px; }
+details { border-top: 1px dashed var(--line); }
+summary { cursor: pointer; display: flex; align-items: center; gap: .55rem; min-height: 48px; font-weight: 700; font-size: .9375rem; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+"; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1.5px solid var(--ink); border-radius: 50%; font-weight: 800; line-height: 1; flex: none; }
+details[open] > summary::before { content: "−"; background: var(--ink); color: var(--paper); }
+summary:hover { text-decoration: underline; }
+.inside { background: var(--wash); border-radius: 10px; padding: 1rem 1.1rem; font-size: .9375rem; display: grid; gap: .5rem; margin-bottom: .6rem; }
+.inside dl { display: grid; gap: .35rem; }
+.inside dt { justify-self: start; font-size: .8125rem; font-weight: 700; line-height: 1.5; border: 1.5px solid var(--ink); border-radius: 999px; padding: 0 .6rem; background: var(--paper); margin-top: .5rem; }
+.inside dt:first-child { margin-top: 0; }
+.inside table { margin-bottom: .5rem; }
+.week { display: grid; gap: .6rem; }
 .week b { display: block; }
-.log { grid-template-columns: 120px 1fr; }
-.log p { font-size: .94rem; margin-top: .3rem; }
-footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
-@media (max-width: 760px) {
-  .tasks { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .flow li { padding: 9px 7px; }
+
+/* 남은 질문, 용어, 이력 */
+.qgroup { border: 1.5px solid var(--ink); border-radius: 14px; padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
+.qgroup h3 { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.qlist { display: grid; gap: .55rem; }
+.qlist a { font-size: .875rem; white-space: nowrap; }
+.words { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.words > div { border: 1.5px solid var(--ink); border-radius: 12px; padding: .9rem 1rem; scroll-margin-top: 5rem; }
+.words dt { font-weight: 800; }
+.words dd { font-size: .9375rem; line-height: 1.65; }
+a.term { text-decoration: underline dotted; text-decoration-thickness: 2px; cursor: help; }
+#term-pop { border: 2px solid var(--ink); border-radius: 14px; padding: 1.2rem 1.3rem; width: min(26rem, calc(100vw - 40px)); box-shadow: 6px 6px 0 var(--ink); color: var(--ink); background: var(--paper); }
+#term-pop::backdrop { background: rgba(0, 0, 0, .25); }
+#term-pop h2 { font-size: 1.2rem; margin-bottom: .4rem; }
+#term-pop .acts { margin-top: .9rem; }
+#term-pop button { font: inherit; font-weight: 700; min-height: 44px; padding: 0 1rem; border: 2px solid var(--ink); border-radius: 10px; background: var(--ink); color: var(--paper); cursor: pointer; }
+.log { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .3rem 1.2rem; padding: 1rem 0; border-top: 1px solid var(--line); }
+.log time { font-size: .875rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: .15rem; }
+.log p { font-size: .9688rem; margin-top: .25rem; }
+.log details { margin-top: .4rem; }
+footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; border-top: 2px solid var(--ink); padding: 1rem 0 2.5rem; font-size: .875rem; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .map { grid-template-columns: 1fr; }
+  .map li + li { border-left: 0; border-top: 1px solid var(--line); }
+  .map a { flex-direction: row; align-items: center; min-height: 60px; gap: .7rem; padding: .7rem .9rem; }
+  .map .st { margin: 0; font-size: 1.4rem; }
+  .map small { margin: 0 0 0 auto; }
+  .flag { position: static; order: 5; }
+  .tasks, .doors { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .slots { grid-template-columns: 1fr; }
+  .slots div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .record { grid-template-columns: 1fr; }
 }
-@media (max-width: 570px) {
-  header, main, footer { width: calc(100% - 32px); }
-  header { gap: 0; padding-bottom: 3px; }
-  nav { gap: 12px; }
-  .hero { padding: 20px 0 18px; }
-  .flow { grid-template-columns: 1fr; }
-  .flow li { grid-template-columns: 5.3rem 1fr; align-items: baseline; padding: 6px 10px; }
-  .flow li + li { border-left: 0; border-top: 1px solid var(--line); }
-  .tasks, .record, .log { grid-template-columns: 1fr; }
-  .record, .log { gap: .4rem; }
-  .next { display: grid; }
-  section { margin-bottom: 28px; }
+@media (max-width: 600px) {
+  .in, main, footer { width: calc(100% - 32px); }
+  .bar .in { gap: .4rem; }
+  .bar nav a { padding: 0 .6rem; }
+  .view { padding-top: 1.4rem; gap: 1.4rem; }
+  .now { padding: 1.1rem 1.1rem; }
+  .now h2 { font-size: 1.45rem; }
+  .howto, .cols2, .tasks, .sys, .index, .words { grid-template-columns: 1fr; }
+  .chain { flex-direction: column; }
+  .chain .box { flex-basis: auto; }
+  .arr.turn { transform: rotate(90deg); }
+  .stairs { grid-auto-flow: row; }
+  .stairs .box { min-height: 0 !important; border-radius: 10px; }
+  .pillars { padding: 0 .4rem; gap: .4rem; }
+  .log { grid-template-columns: 1fr; }
+  .kv { grid-template-columns: 1fr; gap: 0; }
+  .kv dd { margin-bottom: .35rem; }
+  th, td { padding: .6rem .65rem; }
+  .qa th[scope="row"], .qa td:last-child { white-space: normal; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn, .door, .map a, .tag, .pager a { transition: background-color .12s; }
+}
+@media print {
+  .bar { position: static; }
+  .js .view { display: flex; border-top: 1px solid var(--line); }
+  details > .inside { display: grid; }
 }
 </style>
 </head>
 <body id="top">
-<a class="skip" href="#roadmap">기획 순서로 이동</a>
-<header><b>세탁소 경영 시뮬레이션</b><nav aria-label="장부 목차"><a href="#roadmap">기획 순서</a><a href="#work">작업 블록</a><a href="#decisions">확정 기획</a><a href="#history">저장 이력</a></nav></header>
+<a class="skip" href="#home">본문으로 건너뛰기</a>
+<header class="bar"><div class="in">
+  <a class="brand" href="#home">세탁소 기획 장부</a>
+  <nav aria-label="장부 목차">
+    <a href="#home">기획 지도</a>
+    <a href="#game">게임 그림</a>
+    <a href="#ledger">정한 것</a>
+    <a href="#questions">남은 질문</a>
+    <a href="#words">용어</a>
+    <a href="#history">이력</a>
+  </nav>
+</div></header>
 <main>
-<div class="hero"><h1>세탁소 기획 장부</h1><p>동네 세탁소가 문을 닫자 집에서 이웃의 셔츠를 맡기 시작한다. 손빨래로 번 돈으로 첫 가게를 열고, 어떤 주문과 장비에 투자할지 고르는 경영 게임이다.</p></div>
-<section id="roadmap" aria-labelledby="flow-title">
-<div class="section-head"><h2 id="flow-title">기획 순서</h2><p class="updated">마지막 정리 <time datetime="2026-11-25">2026. 11. 25.</time></p></div>
-<ol class="flow">
-  <li><small>1 · 구상 정리</small><strong>게임의 목표 정하기</strong></li>
-  <li><small>2 · 흐름 정리</small><strong>첫 주문 따라가기</strong></li>
-  <li aria-current="step"><small>3 · 현재 작업</small><strong>1호점의 하루 그리기</strong></li>
-  <li><small>4 · 다음</small><strong>수입과 성장 맞추기</strong></li>
-  <li><small>5 · 이후</small><strong>한 벌로 만들어 보기</strong></li>
-</ol>
-<p class="next"><b>다음에 펼칠 일감</b><a href="#first-day">첫 방문 손님의 셔츠를 접수해서 돌려주기까지 주문표 한 장 그리기</a></p>
-</section>
-<section id="work"><div class="section-head"><h2>지금 기획하는 일</h2></div>
-<div class="tasks">
-  <article class="task" id="first-day"><span class="state">지금 작성</span><h3>첫 영업일 주문표</h3><p>아침에 걷은 셔츠 한 벌이 언제 행거로 옮겨지고, 언제 매출이 되는지 그린다.</p><a href="#day">하루 운영 보기</a></article>
-  <article class="task" id="hiring-task"><span class="state">함께 설계</span><h3>직원 한 명의 첫 근무</h3><p>손빨래가 밀렸을 때 직원을 고용하고 첫 옷을 맡기기까지의 화면을 그린다.</p><a href="#staff">직원 배치안 보기</a></article>
-  <article class="task" id="stock-task"><span class="state">함께 설계</span><h3>마감 후 발주 한 건</h3><p>선반에 비누 한 개가 남은 날, 재고 확인부터 다음 배송까지 적는다.</p><a href="#stock">재고와 장비 보기</a></article>
-  <article class="task" id="budget-task"><span class="state">다음 작업</span><h3>첫 주와 첫 달의 장부</h3><p>세탁료에서 세제값·월세·이자를 빼고, 첫 설비를 살 날의 잔액을 계산한다.</p><a href="#growth">성장 단계 보기</a></article>
-  <article class="task" id="orders-task"><span class="state">후보 검토</span><h3>어떤 옷을 받을까</h3><p>셔츠와 바지 주문부터 취급표시·필요한 작업·가격을 주문표 한 줄에 담는다.</p><a href="#portfolio">의류와 수선 보기</a></article>
-  <article class="task" id="prototype"><span class="state">개발자와 협의</span><h3>손빨래 한 판의 시제품</h3><p>셔츠 한 벌로 방향 입력부터 건조·납품까지 해 보고 실수와 감점 기록을 비교한다.</p><a href="#quality">판정 기준 보기</a></article>
-</div></section>
 
-<section class="block" id="decisions"><div class="heading"><h2>확정 기획</h2></div>
+<!-- ============ 첫 화면: 기획 지도 ============ -->
+<section class="view on" id="home" data-view data-title="기획 지도">
+  <div>
+    <p class="kicker">세탁소 경영 시뮬레이션</p>
+    <h1>세탁소 기획 장부</h1>
+  </div>
+  <p class="lead">동네 세탁소가 문을 닫자 집에서 이웃의 셔츠를 맡기 시작한다. 손빨래로 번 돈으로 첫 가게를 열고, 어떤 주문과 장비에 투자할지 고르는 경영 게임이다.</p>
+
+  <!-- 지금 할 곳: 단계가 바뀌면 이 상자와 아래 지도의 aria-current를 함께 고친다 -->
+  <div class="now" id="now">
+    <p class="now-label">지금 할 곳</p>
+    <h2><span class="num">02</span> 목표와 기둥</h2>
+    <p>글로는 03 핵심 루프까지 갔어요. 그런데 게임이 어떻게 끝나는지와, 이 게임이 끝까지 지킬 세 가지가 아직 적혀 있지 않아요. 질문 여섯 개에 답하면 이 단계가 채워져요.</p>
+    <div class="acts"><a class="btn solid" href="#stage-2">02 단계로 들어가기</a><a class="btn" href="#questions">남은 질문 보기</a></div>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>다음 뭐 해?</q> 또는 <q>목표 정하자</q></p>
+    <p class="updated">하던 일 <a href="#first-day">첫 영업일 주문표</a>는 그대로 이어가도 돼요. · 마지막 정리 <time datetime="2026-11-26">2026. 11. 26.</time></p>
+  </div>
+
+  <section id="roadmap" aria-labelledby="map-h">
+    <h2 id="map-h">기획 지도</h2>
+    <p>게임은 이 여덟 단계를 지나 만들어져요. 동그라미가 찬 만큼 기획이 된 거예요. 단계를 누르면 그 안으로 들어가서, 무엇을 정하는 곳인지와 지금까지 정한 것을 볼 수 있어요.</p>
+    <ol class="map">
+      <li><a href="#stage-1"><i class="st done" aria-hidden="true"></i><span class="num">01</span><strong>한 줄 소개</strong><small>많이 됨</small></a></li>
+      <li><a href="#stage-2" aria-current="step"><i class="st part" aria-hidden="true"></i><span class="num">02</span><strong>목표와 기둥</strong><small>일부만</small><em class="flag">지금 여기</em></a></li>
+      <li><a href="#stage-3"><i class="st done" aria-hidden="true"></i><span class="num">03</span><strong>핵심 루프</strong><small>많이 됨</small></a></li>
+      <li><a href="#stage-4"><i class="st empty" aria-hidden="true"></i><span class="num">04</span><strong>첫 시제품</strong><small>비어 있음</small></a></li>
+      <li><a href="#stage-5"><i class="st empty" aria-hidden="true"></i><span class="num">05</span><strong>시스템 지도</strong><small>비어 있음</small></a></li>
+      <li><a href="#stage-6"><i class="st part" aria-hidden="true"></i><span class="num">06</span><strong>규칙과 숫자</strong><small>일부만</small></a></li>
+      <li><a href="#stage-7"><i class="st part" aria-hidden="true"></i><span class="num">07</span><strong>화면과 조작</strong><small>일부만</small></a></li>
+      <li><a href="#stage-8"><i class="st later" aria-hidden="true"></i><span class="num">08</span><strong>제작과 출시</strong><small>나중</small></a></li>
+    </ol>
+    <p class="legend">
+      <span><i class="st done" aria-hidden="true"></i>많이 됨</span>
+      <span><i class="st part" aria-hidden="true"></i>일부만</span>
+      <span><i class="st empty" aria-hidden="true"></i>비어 있음</span>
+      <span><i class="st later" aria-hidden="true"></i>나중</span>
+    </p>
+    <p>순서대로 가는 게 기본이지만 한 줄로 끝나지는 않아요. 시제품을 해 보면 앞 단계로 돌아가 고치게 돼요. 돌아가는 건 잘못이 아니에요.</p>
+  </section>
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">이 장부 쓰는 법</h2>
+    <ol class="howto">
+      <li><b>지도에서 지금 할 곳을 눌러요</b>그 단계에서 무엇을 정하는지 그림과 함께 나와요.</li>
+      <li><b>AI에게 "다음 뭐 해?"라고 말해요</b>AI가 장부를 읽고 질문을 하나씩 물어요.</li>
+      <li><b>이야기가 끝나면 "정리하자"라고 말해요</b>정한 내용이 장부에 들어가고 동그라미가 차요.</li>
+    </ol>
+  </section>
+
+  <section id="work" aria-labelledby="work-h">
+    <h2 id="work-h">하고 있는 일</h2>
+    <p>지금 손에 들고 있는 일감이에요. 번호는 그 일이 속한 단계예요.</p>
+    <div class="tasks">
+      <article class="task" id="first-day"><p class="tags"><span class="tag solid">지금 작성</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p><h3>첫 영업일 주문표</h3><p>아침에 걷은 셔츠 한 벌이 언제 행거로 옮겨지고, 언제 매출이 되는지 그린다.</p><a href="#day">하루 운영 보기</a></article>
+      <article class="task" id="hiring-task"><p class="tags"><span class="tag">함께 설계</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p><h3>직원 한 명의 첫 근무</h3><p>손빨래가 밀렸을 때 직원을 고용하고 첫 옷을 맡기기까지의 화면을 그린다.</p><a href="#staff">직원 배치안 보기</a></article>
+      <article class="task" id="stock-task"><p class="tags"><span class="tag">함께 설계</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p><h3>마감 후 발주 한 건</h3><p>선반에 비누 한 개가 남은 날, 재고 확인부터 다음 배송까지 적는다.</p><a href="#stock">재고와 장비 보기</a></article>
+      <article class="task" id="budget-task"><p class="tags"><span class="tag">다음 작업</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p><h3>첫 주와 첫 달의 장부</h3><p>세탁료에서 세제값·월세·이자를 빼고, 첫 설비를 살 날의 잔액을 계산한다.</p><a href="#growth">성장 단계 보기</a></article>
+      <article class="task" id="orders-task"><p class="tags"><span class="tag">후보 검토</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p><h3>어떤 옷을 받을까</h3><p>셔츠와 바지 주문부터 취급표시·필요한 작업·가격을 주문표 한 줄에 담는다.</p><a href="#portfolio">의류와 수선 보기</a></article>
+      <article class="task" id="prototype"><p class="tags"><span class="tag">개발자와 협의</span><a class="tag dash" href="#stage-4">04 첫 시제품</a></p><h3>손빨래 한 판의 시제품</h3><p>셔츠 한 벌로 방향 입력부터 건조·납품까지 해 보고 실수와 감점 기록을 비교한다.</p><a href="#quality">판정 기준 보기</a></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="doors-h">
+    <h2 id="doors-h">둘러보기</h2>
+    <div class="doors">
+      <a class="door" href="#game"><b>게임을 그림으로 보기</b><span>옷 한 벌이 지나가는 길, 시스템 지도</span></a>
+      <a class="door" href="#ledger"><b>정한 것</b><span data-count="records">지금까지 정한 규칙</span></a>
+      <a class="door" href="#questions"><b>남은 질문</b><span data-count="questions">아직 정하지 않은 것</span></a>
+      <a class="door" href="#words"><b>용어 풀이</b><span data-count="words">낯선 말을 한 줄로</span></a>
+      <a class="door" href="#history"><b>저장 이력</b><span data-count="logs">언제 무엇이 바뀌었나</span></a>
+    </div>
+  </section>
+</section>
+
+<!-- ============ 01 한 줄 소개 ============ -->
+<section class="view" id="stage-1" data-view data-title="01 한 줄 소개">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st done" aria-hidden="true"></i>01 단계 · 많이 됨</p>
+    <h1>한 줄 소개</h1>
+  </div>
+  <p class="plain">친구에게 이 게임을 한 문장으로 소개한다면 뭐라고 할까요? 그 문장을 정하는 단계예요.</p>
+  <figure class="fig">
+    <p class="fig-t">한 줄 소개는 세 조각으로 만들어요</p>
+    <div class="chain">
+      <div class="box"><small>누가 되어</small><b>주식 빚을 진 동네 주민이</b></div>
+      <span class="arr" aria-hidden="true">+</span>
+      <div class="box"><small>무엇을 하고</small><b>이웃의 옷을 손으로 빨아 세탁소를 열고 키우며</b></div>
+      <span class="arr" aria-hidden="true">+</span>
+      <div class="box hole"><small>어떤 기분을 느끼나</small><b>아직 적지 않았어요</b></div>
+    </div>
+    <figcaption>앞의 두 조각은 이미 있어요. 마지막 조각인 '플레이어가 느낄 기분'을 한 줄로 적으면 완성돼요. 빗금 친 칸이 빈칸이에요.</figcaption>
+  </figure>
+  <div class="cols2">
+    <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
+      <li>한 줄 소개. 이 장부 첫 화면의 첫 문단이에요.</li>
+      <li>시작 이야기. 주식 빚과 이자, 그리고 동네에 하나뿐인 세탁소가 문을 닫는 장면이에요.</li>
+      <li>조작 방식. WASD, 방향키, 스페이스바를 쓰는 걸 보면 PC에서 하는 게임이에요.</li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>플레이어가 어떤 기분을 느끼길 바라는지 한 줄.</li>
+      <li>누가 좋아할 게임인지.</li>
+      <li>닮고 싶은 게임 두세 개. 지금은 '어린 시절 플래시 게임'과 '리듬히어로'라는 말만 있어요.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>좋아하는 비슷한 게임을 두세 개 떠올려 보세요. 각 게임에서 무엇을 닮고 싶은지 한 줄씩 적으면 돼요.</p>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>닮고 싶은 게임 정리하자</q></p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#home">← 기획 지도</a><a href="#stage-2">02 목표와 기둥 →</a></nav>
+</section>
+
+<!-- ============ 02 목표와 기둥 ============ -->
+<section class="view" id="stage-2" data-view data-title="02 목표와 기둥">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st part" aria-hidden="true"></i>02 단계 · 일부만 · <span class="tag solid">지금 여기</span></p>
+    <h1>목표와 기둥</h1>
+  </div>
+  <p class="plain">플레이어가 무엇을 향해 달리는지, 그리고 이 게임이 끝까지 지킬 약속이 무엇인지 정하는 단계예요.</p>
+  <p>'게임의 목표'라는 말에는 두 가지가 섞여 있어요. 하나는 <strong>플레이어의 목표</strong>예요. 게임 안에서 무엇을 이루려 하는지를 말해요. 다른 하나는 <strong>만드는 사람의 목표</strong>예요. 플레이어가 어떤 경험을 하길 바라는지를 말하고, <a class="term" href="#w-pillar">기둥</a> 세 개로 적어요. 아래 그림 두 장이 각각 하나씩이에요.</p>
+
+  <figure class="fig">
+    <p class="fig-t">그림 1. 플레이어의 목표는 세 가지 길이로 쌓아요</p>
+    <div class="stairs">
+      <div class="box"><small><i class="st done" aria-hidden="true"></i> 하루</small><b>오늘 받은 주문을 약속대로 끝내고 마감한다</b></div>
+      <div class="box"><small><i class="st done" aria-hidden="true"></i> 한 주, 한 달</small><b>보증금을 모은다. 첫 납부일을 넘긴다</b></div>
+      <div class="box hole"><small><i class="st empty" aria-hidden="true"></i> 끝</small><b>아직 없어요</b><span>무엇을 이루면 이야기가 끝나나요?</span></div>
+    </div>
+    <figcaption>짧은 목표 위에 긴 목표가 올라가요. 하루와 한 달은 이미 있고, 맨 위 칸인 '끝'이 비어 있어요. 실패했을 때 어떻게 되는지도 여기서 정해요. 지금은 '월세를 못 내면 세탁기를 압류당하고 손빨래로 다시 번다'까지만 있어요.</figcaption>
+  </figure>
+
+  <figure class="fig">
+    <p class="fig-t">그림 2. 기둥 세 개가 게임을 받쳐요</p>
+    <div class="temple">
+      <div class="roof">세탁소 게임</div>
+      <div class="pillars"><div>기둥 1<br>비어 있음</div><div>기둥 2<br>비어 있음</div><div>기둥 3<br>비어 있음</div></div>
+      <p class="floor">새 아이디어는 세 기둥에 맞을 때만 넣어요</p>
+    </div>
+    <p class="tags" aria-label="기둥 후보"><span class="tag dash">후보: 손으로 빠는 감각</span><span class="tag dash">후보: 지킬 수 있는 약속만 받기</span><span class="tag dash">후보: 넘어져도 다시 서는 가게</span><span class="tag dash">후보: 언제 살지는 플레이어가 고른다</span></p>
+    <figcaption>기둥은 이 게임이 끝까지 지킬 약속 세 가지예요. 카지노나 구단 의뢰 같은 새 아이디어가 나왔을 때 넣을지 뺄지 정하는 기준이 돼요. 후보 네 개는 AI가 기획 문서에서 되풀이되는 생각을 읽어 낸 거예요. 고르고 고치는 건 기획자가 해요.</figcaption>
+  </figure>
+
+  <section>
+    <h2>여기서 답할 질문 여섯 개</h2>
+    <div class="scroll">
+      <table class="qa">
+        <thead><tr><th scope="col">질문</th><th scope="col">지금 적혀 있는 것</th><th scope="col">상태</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1. 하루</th><td>플레이어가 아침에 "오늘은 이걸 해야지" 하고 떠올리는 건 무엇인가요?<br><span class="muted">받은 주문을 약속대로 끝내고 마감한다. 남은 체력과 건조 칸을 보고 더 받을지 고른다.</span></td><td><i class="st done" aria-hidden="true"></i> 있음</td></tr>
+          <tr><th scope="row">2. 한 주, 한 달</th><td>무엇을 위해 돈을 모으나요? 그 목표는 언제 다음 목표로 바뀌나요?<br><span class="muted">집에서는 보증금 모으기. 개업 뒤에는 첫 납부일까지 다음 영업을 이어갈 여유 만들기.</span></td><td><i class="st done" aria-hidden="true"></i> 있음</td></tr>
+          <tr><th scope="row">3. 끝</th><td>무엇을 이루면 이야기가 끝나나요? 끝난 뒤에도 계속 할 수 있나요?<br><span class="muted">주식 빚, 2호점, 전문점이 나오지만 무엇을 이루면 끝인지는 없다.</span></td><td><i class="st empty" aria-hidden="true"></i> 없음</td></tr>
+          <tr><th scope="row">4. 실패</th><td>돈이 바닥나면 어떻게 되나요? 처음부터 다시인가요, 물러났다가 다시 서나요?<br><span class="muted">월세를 못 내면 세탁기를 압류당하고 손빨래로 다시 번다. 그보다 나빠지면 어떻게 되는지는 없다.</span></td><td><i class="st part" aria-hidden="true"></i> 일부</td></tr>
+          <tr><th scope="row">5. 기둥</th><td>이 게임이 끝까지 지킬 것 세 가지는 무엇인가요?<br><span class="muted">적힌 것은 없다. 위 그림의 후보 네 개가 출발점이다.</span></td><td><i class="st empty" aria-hidden="true"></i> 없음</td></tr>
+          <tr><th scope="row">6. 범위</th><td>첫 버전은 어디에서 끝나나요?<br><span class="muted">첫 주문부터 점포의 첫 재주문까지.</span></td><td><i class="st done" aria-hidden="true"></i> 있음</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>답은 숫자와 조건이 들어간 문장으로 적어요. "가게를 키우는 것이 목표"는 너무 넓어요. "이자 납부일을 다섯 번 넘기면 빚을 다 갚는다"처럼 적어야 성공과 실패를 정할 수 있어요. 이 문장은 형식을 보여 주는 예시예요.</p>
+  </section>
+
+  <figure class="fig">
+    <p class="fig-t">3번 질문의 힌트. 다른 가게 게임들이 끝을 두는 네 가지 방식</p>
+    <div class="chain">
+      <div class="box"><b>빚을 다 갚으면 끝</b><span>정해진 날마다 갚을 돈이 있어요. 이 게임에는 이미 은행 이자가 있어서 잘 이어져요.</span><small>예: Recettear</small></div>
+      <div class="box"><b>정해진 날에 평가</b><span>일정 기간 뒤에 그동안의 가게를 평가해요. 그 뒤로는 자유롭게 계속해요.</span><small>예: Stardew Valley</small></div>
+      <div class="box"><b>단계를 다 오르면 끝</b><span>가게 등급이나 별을 채우면 다음 장이 열려요. 성장 다섯 단계와 잘 맞아요.</span><small>예: Two Point Hospital</small></div>
+      <div class="box"><b>끝없이 운영</b><span>끝은 없고 가게 레벨만 올라가요. 만들기는 쉽지만 후반이 늘어지기 쉬워요.</span><small>예: Supermarket Simulator</small></div>
+    </div>
+    <figcaption>둘을 겹쳐도 돼요. 빚을 다 갚으면 이야기가 끝나고, 그 뒤로는 자유롭게 계속하는 식이에요. 평이 좋은 게임들은 대개 이렇게 겹쳐 써요.</figcaption>
+  </figure>
+
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>AI와 함께 질문 여섯 개에 하나씩 답해요. 한 시간 안팎이면 돼요. 이미 답이 있는 세 개는 맞는지만 확인하면 돼요. 답은 컨셉 한 장 문서에 모여요. 저장소의 <code>01_콘셉트와시나리오/게임개요/컨셉_한장.md</code>예요.</p>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>목표 정하자</q></p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-1">← 01 한 줄 소개</a><a href="#stage-3">03 핵심 루프 →</a></nav>
+</section>
+
+<!-- ============ 03 핵심 루프 ============ -->
+<section class="view" id="stage-3" data-view data-title="03 핵심 루프">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st done" aria-hidden="true"></i>03 단계 · 많이 됨</p>
+    <h1>핵심 루프</h1>
+  </div>
+  <p class="plain">플레이어가 게임에서 계속 되풀이하는 일을 동그라미로 그리는 단계예요.</p>
+  <figure class="fig">
+    <p class="fig-t">이 게임의 동그라미 세 겹</p>
+    <div class="ring">
+      <p class="ring-t">성장 <small>여러 날에 한 바퀴</small></p>
+      <p>돈을 모은다 → 장비와 직원을 들인다 → 더 많은 주문을 받는다 ↻</p>
+      <div class="ring">
+        <p class="ring-t">하루 <small>하루에 한 바퀴</small></p>
+        <p>문을 연다 → 주문을 받고 빤다 → 마감하고 재고를 채운다 ↻</p>
+        <div class="ring core">
+          <p class="ring-t">한 벌 <small>몇 분에 한 바퀴</small></p>
+          <p>접수 → 빨기 → 짜고 털기 → 널기 → 돌려주고 돈 받기 ↻</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>가장 안쪽의 검은 동그라미가 이 게임의 심장이에요. 몇 분마다 되풀이돼요. 그 바깥에 하루가 있고, 가장 바깥에 여러 날에 걸친 성장이 있어요. 안쪽 동그라미가 재미없으면 바깥 동그라미도 버티지 못해요.</figcaption>
+  </figure>
+  <p><a class="btn" href="#journey">옷 한 벌이 지나가는 길을 칸칸이 보기</a></p>
+  <div class="cols2">
+    <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
+      <li>한 벌의 흐름. 접수부터 후기까지 아홉 칸이에요. <a href="#journey">한 벌의 여정</a></li>
+      <li>손빨래 조작. 방향키로 크게 빨고, 스페이스바로 짜고, 박자에 맞춰 털어요. <a href="#wash">빨기</a> · <a href="#wring">짜고 털기</a></li>
+      <li>집에서 보내는 첫 일주일. <a href="#week">일주일 흐름</a></li>
+      <li>집에서 1호점으로 넘어가는 장면. <a href="#shop">1호점으로</a></li>
+      <li>가게의 하루. 문 열기, 주문과 세탁, 청소와 발주예요. <a href="#day">하루 운영</a></li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>첫 영업일 주문표. 지금 쓰고 있어요. <a href="#first-day">일감 보기</a></li>
+      <li>마감 직전에 완료한 주문을 손님이 언제 찾아가는지, 주문한 물품이 언제 오는지. <a href="#day">하루 운영</a></li>
+      <li>성장 동그라미. 다섯 단계 초안은 있고 순서는 정하지 않았어요. <a href="#growth">성장 단계</a></li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>쓰던 '첫 영업일 주문표'를 이어서 마무리해요. 셔츠 한 벌이 아침에 들어와서 언제 행거로 가고 언제 돈이 되는지 한 줄로 따라가면 돼요.</p>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>첫 영업일 주문표 이어서 하자</q></p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-2">← 02 목표와 기둥</a><a href="#stage-4">04 첫 시제품 →</a></nav>
+</section>
+
+<!-- ============ 04 첫 시제품 ============ -->
+<section class="view" id="stage-4" data-view data-title="04 첫 시제품">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st empty" aria-hidden="true"></i>04 단계 · 비어 있음</p>
+    <h1>첫 시제품</h1>
+  </div>
+  <p class="plain">글로만 쓰지 말고, 작게 만들어서 직접 해 보는 단계예요. 재미있는지는 해 봐야 알 수 있어요.</p>
+  <figure class="fig">
+    <p class="fig-t">시제품은 이 네 칸을 빙글빙글 돌아요</p>
+    <div class="chain">
+      <div class="box"><small>1</small><b>궁금한 것 하나 정하기</b></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box"><small>2</small><b>가장 작게 만들기</b></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box"><small>3</small><b>처음 보는 사람이 해 보기</b></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box"><small>4</small><b>본 대로 적고 고치기</b><small>다시 1로 ↻</small></div>
+    </div>
+    <figcaption><a class="term" href="#w-proto">시제품</a> 하나는 질문 하나에만 답해요. 그림이나 소리가 없어도 되고, 확인이 끝나면 버려도 돼요.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-t">이 게임에서 먼저 해 볼 시제품 두 개</p>
+    <div class="chain">
+      <div class="box"><b>손빨래 한 판</b><span>궁금한 것: 수십 번 해도 지겹지 않은가?</span><small>만드는 법: 그림 없이 키 입력과 반응만 있는 웹 한 쪽. 만들 사람을 정해야 해요.</small></div>
+      <div class="box"><b>종이로 하루 돌려 보기</b><span>궁금한 것: 무엇을 먼저 할지 고민이 생기는가?</span><small>만드는 법: 주문 카드, 건조 칸 그림, 동전. 기획자 혼자 오늘 할 수 있어요.</small></div>
+    </div>
+  </figure>
+  <div class="cols2">
+    <section class="panel"><h2>이미 준비된 것</h2><ul class="ticks yes">
+      <li>시험해 볼 숫자. 방향키 8개, 안전하게 짜기 6회, 털기 2박이에요. <a href="#wring">짜고 털기</a></li>
+      <li>결과를 매기는 법. 세탁 품질과 별점 구간이에요. <a href="#quality">품질 평가</a></li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>손빨래 한 판 시제품. 개발자와 이야기하기로 한 상태예요. <a href="#prototype">일감 보기</a></li>
+      <li>종이로 하루 돌려 보기.</li>
+      <li>해 본 기록. 저장소의 <code>05_테스트</code> 폴더가 비어 있어요.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>남에게 시켜 볼 때 지킬 네 가지</h2>
+    <ul class="ticks">
+      <li>처음 해 보는 사람에게 시켜요.</li>
+      <li>설명하지 않고 지켜봐요. 막히는 모습이 가장 쓸모 있는 정보예요.</li>
+      <li>본 것을 그대로 적어요. "어려워했다"가 아니라 "세 번째 방향키에서 두 번 틀렸다"처럼요.</li>
+      <li>한 번에 하나만 고쳐요.</li>
+    </ul>
+  </section>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>종이로 하루 돌려 보기부터 해요. 주문 카드 열 장과 건조 칸 그림만 있으면 돼요.</p>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>종이로 하루 돌려 보기 준비하자</q></p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-3">← 03 핵심 루프</a><a href="#stage-5">05 시스템 지도 →</a></nav>
+</section>
+
+<!-- ============ 05 시스템 지도 ============ -->
+<section class="view" id="stage-5" data-view data-title="05 시스템 지도">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st empty" aria-hidden="true"></i>05 단계 · 비어 있음</p>
+    <h1>시스템 지도</h1>
+  </div>
+  <p class="plain">게임 속 부품들이 서로 무엇을 주고받는지 한 장에 그리는 단계예요.</p>
+  <figure class="fig">
+    <p class="fig-t">부품 하나의 결과가 다음 부품의 시작이 돼요</p>
+    <div class="chain">
+      <div class="box"><small>시스템</small><b>손빨래</b><span>물기를 얼마나 털었나</span></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box"><small>시스템</small><b>건조</b><span>남은 물기만큼 오래 걸린다</span></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box"><small>시스템</small><b>품질과 후기</b><span>덜 마르면 별점이 깎인다</span></div>
+    </div>
+    <figcaption><a class="term" href="#w-system">시스템</a>은 같은 목적을 가진 규칙의 묶음이에요. 이렇게 이어지는 곳을 전부 화살표로 그리면 시스템 지도가 돼요. 지도가 있으면 새 아이디어가 어디에 붙는지, 무엇을 건드리는지 바로 보여요.</figcaption>
+  </figure>
+  <p><a class="btn solid" href="#system-map">시스템 지도 초안 보러 가기</a></p>
+  <div class="cols2">
+    <section class="panel"><h2>이미 있는 것</h2><ul class="ticks yes">
+      <li>문서에서 읽히는 시스템 아홉 개. 주문, 손빨래, 건조, 품질과 후기, 시간과 체력, 돈, 장비, 직원, 재고예요.</li>
+      <li>AI가 문서에서 뽑은 지도 초안. 기획자가 확인하기 전이라 이 단계는 아직 비어 있는 걸로 쳐요. 저장소의 <code>04_시뮬레이션설계/자원과흐름/시스템_지도_초안.md</code>에도 같은 내용이 있어요.</li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>초안 확인. 틀린 화살표와 빠진 상자를 찾아요.</li>
+      <li>카지노, 구단 의뢰, 용도별 세제가 지도의 어디에 붙는지.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>초안을 같이 보면서 "이 화살표는 맞나요?"를 하나씩 확인해요. 삼십 분이면 돼요.</p>
+    <p class="say">AI에게 이렇게 말해 보세요. <q>시스템 지도 같이 확인하자</q></p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-4">← 04 첫 시제품</a><a href="#stage-6">06 규칙과 숫자 →</a></nav>
+</section>
+
+<!-- ============ 06 규칙과 숫자 ============ -->
+<section class="view" id="stage-6" data-view data-title="06 규칙과 숫자">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st part" aria-hidden="true"></i>06 단계 · 일부만</p>
+    <h1>규칙과 숫자</h1>
+  </div>
+  <p class="plain">부품마다 규칙을 적고, 가격과 시간 같은 숫자를 넣는 단계예요.</p>
+  <figure class="fig">
+    <p class="fig-t">시스템 하나마다 이 다섯 칸을 채워요</p>
+    <div class="slots">
+      <div><b>대상과 상태값</b><span>무엇이 있고 어떤 숫자를 지니나</span><small>예: 옷의 물기 30%, 건조도 60%</small></div>
+      <div><b>행동</b><span>플레이어가 할 수 있는 일</span><small>예: 짜기, 털기, 널기</small></div>
+      <div><b>자원 흐름</b><span>무엇이 생기고 사라지나</span><small>예: 세탁료가 들어오고 월세가 나간다</small></div>
+      <div><b>시간</b><span>언제 계산하나</span><small>예: 시계가 흐르면 건조도가 오른다</small></div>
+      <div><b>수식과 표</b><span>어떻게 계산하나</span><small>예: 품질 90% 이상이면 별 5개</small></div>
+    </div>
+    <figcaption>저장소의 <code>04_시뮬레이션설계</code> 폴더 다섯 개가 바로 이 다섯 칸이에요. 지금은 시스템 지도 초안 한 장뿐이지만 채울 재료는 기존 문서에 있어요.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-t">돈은 두 쪽이 비슷해야 해요</p>
+    <div class="chain">
+      <div class="box"><small>들어오는 돈</small><b>세탁료, 급행료, 다림질 추가금</b></div>
+      <span class="arr" aria-hidden="true">≈</span>
+      <div class="box"><small>나가는 돈</small><b>월세, 은행 이자, 수도와 전기, 비누와 세제, 장비, 임금, 변상</b></div>
+    </div>
+    <figcaption>들어오는 쪽이 너무 크면 게임이 쉬워지고, 나가는 쪽이 너무 크면 가게가 무너져요. 하루 수입에서 하루 지출을 뺀 값이 0보다 조금 위인지부터 표로 봐요. 금액은 아직 전부 비어 있어요.</figcaption>
+  </figure>
+  <div class="cols2">
+    <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
+      <li>세탁 품질과 별점 구간. <a href="#quality">품질 평가</a></li>
+      <li>짜기와 털기의 시험값. <a href="#wring">짜고 털기</a></li>
+      <li>이야기 중인 규칙 다섯 묶음. <a href="#staff">직원</a> · <a href="#stock">재고와 발주</a> · <a href="#growth">성장 단계</a> · <a href="#portfolio">의류와 수선</a> · <a href="#detergent">세제와 특수 의뢰</a></li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>모든 금액. 세탁료, 월세, 이자, 장비 가격이 전부 보류예요.</li>
+      <li>첫 주와 첫 달의 장부. <a href="#budget-task">일감 보기</a></li>
+      <li>어떤 옷을 받을까. <a href="#orders-task">일감 보기</a></li>
+      <li>시스템마다 다섯 칸 채우기.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>개발자에게 넘길 때 꼭 적을 네 가지</h2>
+    <ul class="ticks">
+      <li><strong>왜.</strong> 규칙마다 이유를 적어요. 이유가 있으면 개발자가 "왜 이 숫자예요?"를 묻지 않아도 돼요.</li>
+      <li><strong>입력, 조건, 처리, 결과.</strong> "급행은 늦으면 손해"가 아니라, 어느 시각을 무엇과 비교하고 늦으면 얼마가 빠지는지 적어요.</li>
+      <li><strong>예외 표.</strong> 예상대로 안 될 때를 표로 적어요. 칸은 조건, 처리, 플레이어에게 보이는 것 세 개예요.</li>
+      <li><strong>끝났다는 기준.</strong> 무엇이 되면 다 만든 것인지 적어요. 원문의 '개발자 확인 기준'이 이미 이 역할을 하고 있어요.</li>
+    </ul>
+  </section>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>02와 05가 채워진 뒤에 본격적으로 해요. 목표가 있어야 숫자의 기준이 생기기 때문이에요. 그 전에는 지금처럼 떠오르는 규칙을 '이야기 중'으로 적어 두면 돼요.</p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-5">← 05 시스템 지도</a><a href="#stage-7">07 화면과 조작 →</a></nav>
+</section>
+
+<!-- ============ 07 화면과 조작 ============ -->
+<section class="view" id="stage-7" data-view data-title="07 화면과 조작">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st part" aria-hidden="true"></i>07 단계 · 일부만</p>
+    <h1>화면과 조작</h1>
+  </div>
+  <p class="plain">화면에 무엇이 보이고 어떤 키를 누르는지 그리는 단계예요.</p>
+  <figure class="fig">
+    <p class="fig-t">플레이어가 지나가는 화면을 순서대로 놓아요</p>
+    <div class="chain">
+      <div class="box screen"><b>휴대폰</b><small>주문 카드를 보고 받을지 고른다</small></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box screen"><b>작업대</b><small>손빨래 한 판</small></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box screen"><b>건조대</b><small>칸마다 건조도</small></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box screen"><b>완성 행거</b><small>완료 버튼</small></div>
+      <span class="arr turn" aria-hidden="true">→</span>
+      <div class="box screen"><b>장부</b><small>수입과 납부일</small></div>
+    </div>
+    <figcaption>원문에 나오는 장면을 이어 붙인 초안이에요. 각 화면에 무엇이 어디 있는지는 아직 그리지 않았어요. 잘 그릴 필요 없이 상자와 글자면 충분해요.</figcaption>
+  </figure>
+  <div class="cols2">
+    <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
+      <li>조작키. WASD로 움직이고, 방향키로 빨고, 스페이스바로 짜고 털어요. <a href="#wash">빨기</a> · <a href="#wring">짜고 털기</a></li>
+      <li>직원을 고용하고 일을 맡기는 화면의 초안. <a href="#staff">직원 배치</a></li>
+      <li>집 구조 참고 도면 한 장. 저장소의 <code>07_원자료</code>에 있어요.</li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>화면 목록. 어떤 화면이 몇 개 있는지.</li>
+      <li>집 현관과 매장 입구 스케치. 원문에 다음 할 일로 적혀 있어요.</li>
+      <li>화면이 넘어가는 흐름.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>종이에 손으로 그려서 사진으로 올려도 돼요. 집 현관 한 장, 매장 입구 한 장부터 시작해요. 작업대, 건조대, 완성 행거가 어디 있는지와 손님이 다니는 길만 표시하면 돼요.</p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-6">← 06 규칙과 숫자</a><a href="#stage-8">08 제작과 출시 →</a></nav>
+</section>
+
+<!-- ============ 08 제작과 출시 ============ -->
+<section class="view" id="stage-8" data-view data-title="08 제작과 출시">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="stage-no"><i class="st later" aria-hidden="true"></i>08 단계 · 나중</p>
+    <h1>제작과 출시</h1>
+  </div>
+  <p class="plain">작게 끝까지 만든 다음, 넓혀서 내놓는 단계예요. 여기부터는 개발자가 이끌어요.</p>
+  <figure class="fig">
+    <p class="fig-t">한 칸씩 올라가요</p>
+    <div class="stairs">
+      <div class="box"><small>1</small><b>첫 제작 범위</b><span>첫 주문부터 점포의 첫 재주문까지를 진짜 품질로</span></div>
+      <div class="box"><small>2</small><b>넓히기</b><span>다림질, 기계, 직원을 차례로 더한다</span></div>
+      <div class="box"><small>3</small><b>시험판</b><span>여러 사람이 해 보고 고친다</span></div>
+      <div class="box inv"><small>4</small><b>출시</b></div>
+    </div>
+    <figcaption>처음부터 전부 만들지 않아요. 짧은 한 구간을 끝까지 만들어 재미를 확인하고, 그다음에 넓혀요.</figcaption>
+  </figure>
+  <div class="cols2">
+    <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
+      <li>첫 제작 범위. 첫 주문부터 점포의 첫 재주문까지예요.</li>
+    </ul></section>
+    <section class="panel todo"><h2>아직 남은 것</h2><ul class="ticks">
+      <li>어떤 도구(엔진)로 만들지. 개발자와 정해요.</li>
+      <li>일정과 역할.</li>
+    </ul></section>
+  </div>
+  <section>
+    <h2>다음 한 걸음</h2>
+    <p>지금은 손대지 않아요. 앞 단계가 채워지면 개발자와 함께 열어요.</p>
+  </section>
+  <nav class="pager" aria-label="단계 이동"><a href="#stage-7">← 07 화면과 조작</a><a href="#home">기획 지도 →</a></nav>
+</section>
+
+<!-- ============ 게임을 그림으로 보기 ============ -->
+<section class="view" id="game" data-view data-title="게임 그림">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="kicker">게임을 그림으로 보기</p>
+    <h1>이 게임은 이렇게 돌아가요</h1>
+  </div>
+  <p class="plain">글로 적힌 규칙을 그림 두 장으로 옮겼어요. 하나는 옷 한 벌이 지나가는 길이고, 하나는 돈과 평판이 도는 길이에요.</p>
+  <p><a class="btn" href="#journey">한 벌의 여정</a> <a class="btn" href="#system-map">시스템 지도</a></p>
+
+  <section id="journey" aria-labelledby="journey-h">
+    <h2 id="journey-h">한 벌의 여정</h2>
+    <p>셔츠 한 벌이 들어와서 돈과 후기가 되기까지 아홉 칸을 지나요. 칸을 누르면 그 칸의 규칙으로 내려가요.</p>
+    <nav class="strip" aria-label="여정 칸 바로가기">
+      <a href="#step-1">1 접수</a><span aria-hidden="true">→</span>
+      <a href="#step-2">2 크게 빨기</a><span aria-hidden="true">→</span>
+      <a href="#step-3">3 부분 얼룩</a><span aria-hidden="true">→</span>
+      <a href="#step-4">4 짜기</a><span aria-hidden="true">→</span>
+      <a href="#step-5">5 털기</a><span aria-hidden="true">→</span>
+      <a href="#step-6">6 널기와 건조</a><span aria-hidden="true">→</span>
+      <a href="#step-7">7 행거와 완료</a><span aria-hidden="true">→</span>
+      <a href="#step-8">8 수령과 입금</a><span aria-hidden="true">→</span>
+      <a href="#step-9">9 후기</a>
+    </nav>
+    <ol class="journey">
+      <li id="step-1"><span class="jn">1</span><div class="jbody">
+        <h3>접수</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>주문 카드를 보고 받을지 고른다. 집에서는 휴대폰으로, 가게에서는 카운터에서 받는다.</dd><dt>살펴볼 것</dt><dd>옷과 수량, 요금, 급행이면 약속 시각. 그리고 남은 체력과 빈 건조 칸.</dd><dt>바뀌는 것</dt><dd>받으면 그 옷이 내 일감이 된다. 일반 주문에는 마감이 없다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><a class="tag" href="#day">장부: 하루 운영</a><a class="tag" href="#shop">장부: 1호점으로</a></p>
+      </div></li>
+      <li id="step-2"><span class="jn">2</span><div class="jbody">
+        <h3>크게 빨기</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>화면에 나온 방향키 7~10개를 제한 시간 안에 순서대로 누른다. 첫 셔츠는 8개다.</dd><dt>바뀌는 것</dt><dd>틀리거나 놓친 만큼 때가 남아 세탁 품질이 깎인다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">깎이는 정도는 시험값</span><a class="tag" href="#wash">장부: 손빨래와 부분 얼룩</a></p>
+      </div></li>
+      <li id="step-3"><span class="jn">3</span><div class="jbody">
+        <h3>부분 얼룩</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>소매나 깃에 남은 얼룩을 따로 지운다.</dd><dt>바뀌는 것</dt><dd>그 자리의 얼룩이 줄어든다.</dd></dl>
+        <p class="tags"><span class="tag dash">조작은 아직 미정</span><a class="tag" href="#wash">장부: 손빨래와 부분 얼룩</a></p>
+      </div></li>
+      <li id="step-4"><span class="jn">4</span><div class="jbody">
+        <h3>짜기</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>스페이스바를 연타해 물기를 짠다. 물줄기가 방울로 바뀌면 멈춘다.</dd><dt>바뀌는 것</dt><dd>물기가 줄어든다. 경고가 뜬 뒤에도 계속 짜면 옷감이 상한다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">횟수와 손상은 시험값</span><a class="tag" href="#wring">장부: 짜고 털기</a></p>
+      </div></li>
+      <li id="step-5"><span class="jn">5</span><div class="jbody">
+        <h3>털기</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>움직이는 원이 목표 원에 겹치는 박자에 맞춰 스페이스바를 두 번 누른다.</dd><dt>바뀌는 것</dt><dd>남은 물기와 주름이 줄어든다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">판정 연출은 보류</span><a class="tag" href="#wring">장부: 짜고 털기</a></p>
+      </div></li>
+      <li id="step-6"><span class="jn">6</span><div class="jbody">
+        <h3>널기와 건조</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>건조대에 넌다. 집에서는 발코니 빨랫줄이다. 급하면 부채, 선풍기, 드라이기를 쓴다.</dd><dt>바뀌는 것</dt><dd>건조 칸 하나를 차지한다. 시간이 흐르면 건조도가 오른다. 날이 흐리거나 물기가 많이 남았으면 오래 걸린다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">도구가 빨라지는 정도는 가안</span><a class="tag" href="#week">장부: 첫 일주일</a></p>
+      </div></li>
+      <li id="step-7"><span class="jn">7</span><div class="jbody">
+        <h3>행거에 걸고 완료</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>마른 옷을 입구의 완성 행거에 걸고 완료를 누른다.</dd><dt>바뀌는 것</dt><dd>건조 칸이 빈다. 주문이 수령 대기가 된다. 급행은 완료를 누른 시각을 약속 시각과 비교한다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><a class="tag" href="#day">장부: 하루 운영</a></p>
+      </div></li>
+      <li id="step-8"><span class="jn">8</span><div class="jbody">
+        <h3>수령과 입금</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>손님이 와서 옷을 찾아간다. 플레이어는 하던 일을 계속한다.</dd><dt>바뀌는 것</dt><dd>대금이 한 번 들어온다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">마감 직전 주문의 수령 시점은 남은 질문</span><a class="tag" href="#day">장부: 하루 운영</a></p>
+      </div></li>
+      <li id="step-9"><span class="jn">9</span><div class="jbody">
+        <h3>후기</h3>
+        <dl class="kv"><dt>하는 일</dt><dd>손님이 옷을 받은 뒤 남긴 별점과 한 줄 평을 읽는다.</dd><dt>바뀌는 것</dt><dd>납품할 때의 세탁 품질이 별점이 된다. 90% 이상이면 별 5개다. 별 1개는 환불이나 변상 요청으로 이어질 수 있다.</dd></dl>
+        <p class="tags"><span class="tag solid">정함</span><span class="tag dash">환불과 변상 조건은 협의</span><a class="tag" href="#quality">장부: 품질 평가</a></p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section id="system-map" aria-labelledby="sysmap-h">
+    <h2 id="sysmap-h">시스템 지도 <span class="tag dash">초안 · 기획자 확인 전</span></h2>
+    <p>가게를 굴리는 부품 여덟 개와 그 사이를 오가는 것들이에요. 상자를 누르면 아래 설명으로 내려가요.</p>
+    <figure class="fig">
+      <div class="dgwrap">
+        <svg class="dg" viewBox="0 0 884 470" role="img" aria-label="세탁소 게임의 시스템 지도 초안. 주문, 손작업, 건조, 납품이 차례로 이어진다. 납품의 별점이 평판을 거쳐 주문을 늘린다. 납품에서 번 현금이 장비에 투자되어 손작업과 건조를 빠르게 한다. 현금은 월세, 이자, 공과금으로 매달 빠져나간다.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="15" markerHeight="15" orient="auto"><path d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+          <polyline class="lp" points="780,150 780,45 509,45" marker-end="url(#ahb)"/>
+          <polyline class="lp" points="355,45 90,45 90,146" marker-end="url(#ahb)"/>
+          <text class="ll" x="646" y="34" text-anchor="middle">별점</text>
+          <text class="ll" x="219" y="34" text-anchor="middle">주문이 는다</text>
+          <line class="ln" x1="160" y1="178" x2="247" y2="178" marker-end="url(#ah)"/>
+          <line class="ln" x1="390" y1="178" x2="477" y2="178" marker-end="url(#ah)"/>
+          <line class="ln" x1="620" y1="178" x2="707" y2="178" marker-end="url(#ah)"/>
+          <text class="l" x="205" y="168" text-anchor="middle">체력을 쓴다</text>
+          <text class="l" x="435" y="168" text-anchor="middle">남은 물기</text>
+          <text class="l" x="665" y="168" text-anchor="middle">건조도</text>
+          <line class="ln" x1="780" y1="206" x2="780" y2="297" marker-end="url(#ah)"/>
+          <text class="l" x="792" y="256">세탁료</text>
+          <line class="ln" x1="780" y1="356" x2="780" y2="397" marker-end="url(#ah)"/>
+          <text class="l" x="792" y="382">매달 나간다</text>
+          <line class="lp" x1="710" y1="328" x2="509" y2="328" marker-end="url(#ahb)"/>
+          <text class="ll" x="611" y="316" text-anchor="middle">투자</text>
+          <line class="lp" x1="372" y1="300" x2="372" y2="210" marker-end="url(#ahb)"/>
+          <line class="lp" x1="492" y1="300" x2="492" y2="210" marker-end="url(#ahb)"/>
+          <text class="ll" x="360" y="262" text-anchor="end">손이 빨라진다</text>
+          <text class="ll" x="504" y="262">칸이 는다</text>
+          <a href="#sys-fame"><rect x="355" y="18" width="150" height="54" rx="8"/><text class="t" x="430" y="42" text-anchor="middle">평판</text><text class="s" x="430" y="60" text-anchor="middle">후기가 쌓인다</text></a>
+          <a href="#sys-order"><rect x="20" y="150" width="140" height="56" rx="8"/><text class="t" x="90" y="175" text-anchor="middle">주문</text><text class="s" x="90" y="193" text-anchor="middle">받을지 고른다</text></a>
+          <a href="#sys-hand"><rect x="250" y="150" width="140" height="56" rx="8"/><text class="t" x="320" y="175" text-anchor="middle">손작업</text><text class="s" x="320" y="193" text-anchor="middle">빨기 · 짜기 · 털기</text></a>
+          <a href="#sys-dry"><rect x="480" y="150" width="140" height="56" rx="8"/><text class="t" x="550" y="175" text-anchor="middle">건조</text><text class="s" x="550" y="193" text-anchor="middle">칸을 차지한다</text></a>
+          <a href="#sys-deliver"><rect x="710" y="150" width="140" height="56" rx="8"/><text class="t" x="780" y="175" text-anchor="middle">납품</text><text class="s" x="780" y="193" text-anchor="middle">품질이 별점이 된다</text></a>
+          <a href="#sys-cash"><rect x="710" y="300" width="140" height="56" rx="8"/><text class="t" x="780" y="333" text-anchor="middle">현금</text></a>
+          <a href="#sys-gear"><rect x="345" y="300" width="160" height="56" rx="8"/><text class="t" x="425" y="325" text-anchor="middle">장비 · 비누 · 직원</text><text class="s" x="425" y="343" text-anchor="middle">더 빨리, 더 많이</text></a>
+          <a href="#sys-fixed"><rect class="sink" x="690" y="400" width="180" height="50" rx="8"/><text class="t" x="780" y="430" text-anchor="middle">월세 · 이자 · 공과금</text></a>
+        </svg>
+      </div>
+      <figcaption>가는 화살표는 옷 한 벌이 지나가는 길이에요. 굵은 화살표 두 묶음이 가게를 키우는 고리예요. 잘 빨수록 주문이 느는 평판 고리, 번 돈으로 더 많이 처리하게 되는 투자 고리. 점선 상자는 매달 돈이 빠져나가는 곳이에요. AI가 기획 문서에서 뽑은 초안이라 기획자의 확인이 필요해요. 금액이 모두 보류라서 이 고리가 얼마나 빨리 도는지는 아직 정해지지 않았어요.</figcaption>
+    </figure>
+    <dl class="sys">
+      <div id="sys-order"><dt>주문</dt><dd>들어온 주문을 받을지 고르는 곳이에요. 평판이 좋을수록 주문이 늘어요. 받은 옷은 손작업으로 넘어가요.</dd><dd class="tags"><a class="tag" href="#day">장부: 하루 운영</a></dd></div>
+      <div id="sys-hand"><dt>손작업</dt><dd>빨기, 짜기, 털기예요. 체력을 써요. 물기를 얼마나 털었는지가 건조로 넘어가요. 비누가 좋아지면 손이 빨라져요.</dd><dd class="tags"><a class="tag" href="#wash">장부: 손빨래</a><a class="tag" href="#wring">장부: 짜고 털기</a></dd></div>
+      <div id="sys-dry"><dt>건조</dt><dd>옷이 건조 칸을 차지하고 마르기를 기다려요. 칸이 차 있으면 새 주문을 받기 어려워요. 건조대를 늘리면 칸이 늘어요.</dd><dd class="tags"><a class="tag" href="#week">장부: 첫 일주일</a></dd></div>
+      <div id="sys-deliver"><dt>납품</dt><dd>행거에 걸고 완료를 누르면 손님이 찾아가요. 이때의 세탁 품질이 별점이 되고, 세탁료가 들어와요.</dd><dd class="tags"><a class="tag" href="#quality">장부: 품질 평가</a></dd></div>
+      <div id="sys-fame"><dt>평판</dt><dd>별점과 후기가 쌓인 거예요. 평판이 오르면 주문이 늘고, 세탁 요금을 고칠 수 있게 돼요.</dd><dd class="tags"><a class="tag" href="#quality">장부: 품질 평가</a></dd></div>
+      <div id="sys-cash"><dt>현금</dt><dd>세탁료, 급행료, 다림질 추가금이 들어와요. 장비에 투자하거나 매달 나가는 돈으로 써요.</dd><dd class="tags"><a class="tag" href="#growth">장부: 성장 단계</a></dd></div>
+      <div id="sys-gear"><dt>장비, 비누, 직원</dt><dd>번 돈으로 들여요. 손이 빨라지고 건조 칸이 늘어서 같은 하루에 더 많은 주문을 받게 돼요.</dd><dd class="tags"><a class="tag" href="#growth">장부: 성장 단계</a><a class="tag" href="#staff">장부: 직원</a><a class="tag" href="#stock">장부: 재고</a></dd></div>
+      <div id="sys-fixed"><dt>월세, 이자, 공과금</dt><dd>매달 빠져나가는 돈이에요. 월세가 밀리면 세탁기를 압류당하고, 손빨래로 다시 벌어야 해요.</dd><dd class="tags"><a class="tag" href="#growth">장부: 성장 단계</a></dd></div>
+    </dl>
+  </section>
+</section>
+
+<!-- ============ 정한 것 (장부) ============ -->
+<section class="view" id="ledger" data-view data-title="정한 것">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="kicker">장부</p>
+    <h1>정한 것</h1>
+  </div>
+  <p class="plain">지금까지 이야기해서 정한 규칙이에요. 주제마다 맨 위 문장이 합의한 내용이에요. 동그란 더하기 단추를 누르면 시험해 볼 숫자, 미뤄 둔 안, 버린 안이 나와요.</p>
+  <p class="legend">
+    <span><span class="tag solid">정함</span>합의한 주제</span>
+    <span><span class="tag">이야기 중</span>아직 안으로 남은 주제</span>
+    <span><span class="tag dash">03</span>그 주제가 속한 단계</span>
+  </p>
+  <nav aria-label="주제 목록">
+    <ul class="index">
+      <li><a href="#week"><i class="st done" aria-hidden="true"></i>집에서 보내는 첫 일주일</a></li>
+      <li><a href="#wash"><i class="st done" aria-hidden="true"></i>손빨래와 부분 얼룩</a></li>
+      <li><a href="#wring"><i class="st done" aria-hidden="true"></i>한 판에서 짜고, 이어서 털기</a></li>
+      <li><a href="#quality"><i class="st done" aria-hidden="true"></i>납품할 때 세탁 품질로 평가</a></li>
+      <li><a href="#shop"><i class="st done" aria-hidden="true"></i>집에서 1호점으로</a></li>
+      <li><a href="#day"><i class="st done" aria-hidden="true"></i>문 열고, 옷을 돌려주고, 마감하기</a></li>
+      <li><a href="#staff"><i class="st part" aria-hidden="true"></i>구인구직 창과 업무 칸</a></li>
+      <li><a href="#stock"><i class="st part" aria-hidden="true"></i>휴대폰 발주와 창고 선반</a></li>
+      <li><a href="#growth"><i class="st part" aria-hidden="true"></i>동네 세탁소가 커지는 다섯 단계</a></li>
+      <li><a href="#detergent"><i class="st part" aria-hidden="true"></i>손세탁 코스 효과와 특수 의뢰 구상</a></li>
+      <li><a href="#portfolio"><i class="st part" aria-hidden="true"></i>취급 의류와 추가 서비스 범위</a></li>
+    </ul>
+  </nav>
+
+  <!-- 확정 기획: 합의한 문장만 주제 맨 위에 쓴다 -->
+  <div class="group" id="decisions">
+    <h2>정한 것 <small class="muted">확정 기획</small></h2>
 <article id="week" class="record">
-<h3>집에서 보내는 첫 일주일</h3><div><p>집에서 받은 첫 셔츠를 빨아 돌려주고, 일주일 동안 모은 돈으로 1호점을 연다.</p>
+<header><h3>집에서 보내는 첫 일주일</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p></header><div><p>집에서 받은 첫 셔츠를 빨아 돌려주고, 일주일 동안 모은 돈으로 1호점을 연다.</p>
 <details><summary>일자별 흐름과 설계 이유</summary><div class="inside"><ol class="week">
 <li><b>1일 · 첫 셔츠</b>당근에 글을 올리고 마감 없는 일반 주문을 받는다. 집 욕실에서 빨고 발코니에 넌다.</li>
 <li><b>2일 · 첫 수입</b>건조도를 보고 현관 행거에서 완료한다. 손님이 수령하면 입금된다. 다음 셔츠로 소매 얼룩을 배운다.</li>
@@ -127,23 +939,23 @@ footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
 </ol><p>한 벌을 다루는 법에서 시작해 여러 손님의 납기와 공간을 판단하게 된다. 집에서 생긴 제약이 점포를 열 이유가 된다.</p></div></details></div>
 </article>
 <article id="wash" class="record">
-<h3>손빨래와 부분 얼룩</h3><div><p>크게 빨기는 제한 시간 안에 무작위 방향키 7~10개를 순서대로 입력한다. 소매나 깃에 남은 얼룩은 별도 단계에서 지운다.</p>
+<header><h3>손빨래와 부분 얼룩</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-3">03 핵심 루프</a><a class="tag dash" href="#stage-7">07 화면과 조작</a></p></header><div><p>크게 빨기는 제한 시간 안에 무작위 방향키 7~10개를 순서대로 입력한다. 소매나 깃에 남은 얼룩은 별도 단계에서 지운다.</p>
 <details><summary>이전 조작과 부분 얼룩 후보</summary><div class="inside"><dl><dt>대체</dt><dd>크게 빨기의 좌클릭과 국소 얼룩의 마우스 휠 조작을 교체한다.</dd><dt>폐기</dt><dd>솔로 자국을 따라 닦는 안은 원하는 어린 시절 플래시 게임의 감각과 달라 제외했다.</dd><dt>보류</dt><dd>두더지 잡기, 짝 맞추기, 비눗방울 연쇄 반응이 후보였다. 짧은 게임을 더 해 보고 부분 얼룩 조작을 정한다.</dd><dt>시험값</dt><dd>첫 면 셔츠는 방향 8개부터 시작한다. 일반 주문은 기본 2판, 부분 얼룩이 있으면 1판 추가하는 안이다.</dd></dl></div></details></div>
 </article>
 <article id="wring" class="record">
-<h3>한 판에서 짜고, 이어서 털기</h3><div><p>스페이스바를 연타해 물기를 짠다. 옷이 펼쳐지면 움직이는 원이 목표 원에 겹치는 박자에 맞춰 털어 남은 물기와 주름을 줄인다.</p>
+<header><h3>한 판에서 짜고, 이어서 털기</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-3">03 핵심 루프</a><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header><div><p>스페이스바를 연타해 물기를 짠다. 옷이 펼쳐지면 움직이는 원이 목표 원에 겹치는 박자에 맞춰 털어 남은 물기와 주름을 줄인다.</p>
 <details><summary>대체한 방식과 옷감별 시험값</summary><div class="inside"><dl><dt>대체</dt><dd>연타로 털던 방식, 세 원을 같은 방식으로 누르는 안, 길게 눌러 짜는 안을 거쳤다. 짜기는 멈출 때를 고르고 털기는 박자를 맞추는 두 동작으로 정리했다.</dd><dt>확장</dt><dd>고급 손세탁 의류에도 같은 흐름을 적용한다. 섬세한 옷은 경고가 일찍 뜨고 과하게 짜면 손상이 더 쌓이는 안이다.</dd><dt>시험값</dt><dd>안전하게 짜기는 일반 면 6회·섬세한 옷 5회, 털기는 2박이다. 경고 뒤 과도한 짜기 1회당 손상은 +3%p·+5%p로 시험한다.</dd><dt>보류</dt><dd>튜토리얼 털기의 판정 애니메이션 후보는 두 가지다. A안은 퍼펙트·굿·미스 3단계로 정확도에 따라 물방울과 옷이 펴지는 모습을 다르게 한다. B안은 굿·미스 2단계로 단순화해 성공·실패 연출을 나눈다. 선택, 판정 범위, 애니메이션 강도와 점수 반영은 미정이다.</dd></dl></div></details></div>
 </article>
 <article id="quality" class="record">
-<h3>납품할 때 세탁 품질로 평가</h3><div><p>남은 얼룩·물기·주름·옷감 손상을 합쳐 별점을 정한다. 별 1개를 받은 주문은 불만 원인에 따라 환불이나 변상 요청으로 이어질 수 있다.</p>
+<header><h3>납품할 때 세탁 품질로 평가</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header><div><p>남은 얼룩·물기·주름·옷감 손상을 합쳐 별점을 정한다. 별 1개를 받은 주문은 불만 원인에 따라 환불이나 변상 요청으로 이어질 수 있다.</p>
 <details><summary>별점 기준과 개발자 협의안</summary><div class="inside"><table><caption>세탁 품질에 따른 별점</caption><thead><tr><th scope="col">납품 시 품질</th><th scope="col">손님 평가</th></tr></thead><tbody><tr><td>90% 이상</td><td>별 5개</td></tr><tr><td>85% 이상 ~ 90% 미만</td><td>별 4개</td></tr><tr><td>80% 이상 ~ 85% 미만</td><td>별 3개</td></tr><tr><td>75% 이상 ~ 80% 미만</td><td>별 2개</td></tr><tr><td>75% 미만</td><td>별 1개</td></tr></tbody></table><dl><dt>확장</dt><dd>‘청결도’를 ‘세탁 품질’로 확장했다. 마른 뒤 다림질로 편 주름까지 이중으로 감점하지 않도록 납품 상태를 본다.</dd><dt>협의</dt><dd>선택 1은 ‘3번째 오입력, 7번째 시간 초과’처럼 순번을 남긴다. 선택 2는 ‘정답 6개·오입력 1개·시간 초과 1개’와 결과 퍼센트를 남긴다.</dd><dt>제안</dt><dd>3일차 첫 후기는 별점과 한 줄 평으로 보여주는 안이다. 크게 빨기의 품질 비중 30%, 환불·변상 발생 조건과 금액은 개발자와 정한다.</dd><dt>이전안</dt><dd>손상도 15%를 단독 환불 기준으로 삼는 안은 시험 후보였다.</dd></dl></div></details></div>
 </article>
 <article id="shop" class="record">
-<h3>집에서 1호점으로</h3><div><p>계약 다음 날 세탁소 카운터에서 첫 방문 주문을 받는다. 보유한 비누와 도구, 단골·평판·잔액을 이어받고 매장 요금을 적용한다.</p>
+<header><h3>집에서 1호점으로</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p></header><div><p>계약 다음 날 세탁소 카운터에서 첫 방문 주문을 받는다. 보유한 비누와 도구, 단골·평판·잔액을 이어받고 매장 요금을 적용한다.</p>
 <details><summary>첫 영업 장면과 이후 성장 아이디어</summary><div class="inside"><dl><dt>초안</dt><dd>집에서 셔츠를 맡겼던 단골이 첫 손님으로 온다. 셔츠가 마르는 사이 두 번째 손님이 들어오면 건조대와 체력을 보고 주문을 받을지 고른다. 첫 옷을 찾아가면 장부에 매장 첫 수입이 찍힌다.</dd><dt>성장 구상</dt><dd>건조 공간과 다림질 서비스, 세탁기·건조기, 확장과 직원 고용을 거쳐 고정 거래처와 무인 2호점으로 이어진다. 장비 구입 시점은 플레이어의 영업 상황에 맡긴다.</dd><dt>후속 검토</dt><dd>첫 셔츠의 건조 시간, 도구 효과 중첩, 급행 납기 여유를 시험한 뒤 소모품비·매장 요금·보증금의 균형을 맞춘다.</dd></dl></div></details></div>
 </article>
 <article class="record" id="day">
-  <h3>문 열고, 옷을 돌려주고, 마감하기</h3>
+  <header><h3>문 열고, 옷을 돌려주고, 마감하기</h3><p class="tags"><span class="tag solid">정함</span><a class="tag dash" href="#stage-3">03 핵심 루프</a></p></header>
   <div><p>아침에 가게 문을 열고 전날 마른 옷을 앞쪽 완성 행거에 건다. 낮에는 주문을 받고 세탁한다. 저녁에는 청소한 뒤 재고를 세고 필요한 물품을 주문한다.</p>
     <details><summary>첫 영업일에 정할 세부 규칙</summary><div class="inside"><dl>
       <dt>수령과 입금</dt><dd>한 주문의 옷을 모두 행거에 건 뒤 완료를 누르면 수령 대기가 된다. 손님이 찾아갈 때 대금을 한 번 받는 흐름이다.</dd>
@@ -152,10 +964,13 @@ footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
     </dl></div></details>
   </div>
 </article>
-</section>
-<section id="drafts"><div class="section-head"><h2>논의 중인 운영 규칙</h2></div>
+  </div>
+
+  <!-- 논의 중인 운영 규칙 -->
+  <div class="group" id="drafts">
+    <h2>이야기 중인 것 <small class="muted">논의 중인 운영 규칙</small></h2>
 <article class="record" id="staff">
-  <h3>구인구직 창과 업무 칸</h3>
+  <header><h3>구인구직 창과 업무 칸</h3><p class="tags"><span class="tag">이야기 중</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a><a class="tag dash" href="#stage-7">07 화면과 조작</a></p></header>
   <div><p>직원을 고용한 뒤 초상화를 손빨래·기계 세탁·다림질·수선 칸에 넣어 일을 맡기는 안이다. 빈 파트는 사장이 직접 처리한다.</p>
     <details><summary>고용 시점 · 배치 예시 · 이전 안</summary><div class="inside"><dl>
       <dt>첫 직원 시험안</dt><dd>혼자 일하다 손작업 2건 이상이 대기하면 구인구직 창을 한 번 안내한다. 자연 건조와 손님 수령 대기는 집계에서 뺀다. 고용 시점은 플레이어가 고른다.</dd>
@@ -166,7 +981,7 @@ footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
   </div>
 </article>
 <article class="record" id="stock">
-  <h3>휴대폰 발주와 창고 선반</h3>
+  <header><h3>휴대폰 발주와 창고 선반</h3><p class="tags"><span class="tag">이야기 중</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header>
   <div><p>마감 때 확인한 재고로 휴대폰 장보기 앱에서 세제와 비누를 주문하는 안이다.</p>
     <details><summary>배송 · 보관 · 중고품</summary><div class="inside"><dl>
       <dt>보관 후보</dt><dd>창고에 상자째 보관하거나 선반에 종류별로 놓는다. 배송 상자를 한 번 조작하면 선반으로 정리되는 방식도 비교한다.</dd>
@@ -176,7 +991,7 @@ footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
   </div>
 </article>
 <article class="record" id="growth">
-  <h3>동네 세탁소가 커지는 다섯 단계</h3>
+  <header><h3>동네 세탁소가 커지는 다섯 단계</h3><p class="tags"><span class="tag">이야기 중</span><a class="tag dash" href="#stage-3">03 핵심 루프</a><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header>
   <div><p>첫 영업, 다림질, 기계 세탁, 공간 확장, 전문점 순으로 성장하는 초안이다.</p>
     <details><summary>장비를 살 이유와 해금 후보</summary><div class="inside"><dl>
       <dt>첫 영업과 다림질</dt><dd>손빨래와 건조대로 시작한다. 갈빗집 일감을 계기로 숯다리미와 작은 판을 얻고 일반 다리미, 가정용 스팀, 세탁소용 다리미로 발전하는 안이다.</dd>
@@ -186,23 +1001,234 @@ footer { border-top: 1px solid var(--ink); padding: 16px 0 32px; }
     </dl></div></details>
   </div>
 </article>
-
-<article id="detergent" class="record"><h3>손세탁 코스 효과와 특수 의뢰 구상</h3><div><p>빨기 등 손세탁 전반에 동작 이펙트를 적용하고, 용도별 세제와 스포츠 구단 의뢰를 확장 아이디어로 제안했다. 구체 효과와 진행 방식은 미정이다.</p><details><summary>보류 중인 확장 아이디어</summary><div class="inside"><dl><dt>이펙트</dt><dd>털기뿐 아니라 빨기 등 모든 손세탁 코스에서 입력과 결과가 보이는 애니메이션·효과를 적용하는 구상이다. 크게 빨기에서 방향키를 틀리면 캐릭터가 살짝 미끄러지는 짧은 반응도 후보로 나왔다. 리듬히어로처럼 실수를 즉시 알아차리는 피드백을 참고하며, 반복 여부와 길이는 미정이다.</dd><dt>세제</dt><dd>울 전용, 일반 중성, 스포츠 의류용 세제로 나누는 안이다. 각 세제의 옷감 적합성, 흙·잔디 등 오염별 효과와 비용은 미정이다.</dd><dt>구단 의뢰</dt><dd>야구·축구 구단의 유니폼은 흙이나 잔디 오염이 심해 기계 세탁 후에도 때가 남고, 기계 세탁에 손빨래를 더하는 특수 주문으로 구상한다. 의뢰 소개에 유명 선수 미션을 연결하는 예시도 나왔으며 채택 여부는 미정이다.</dd><dt>후속 검토</dt><dd>등장 시점, 주문 난이도와 보상, 특정 인물 연계 가능성을 정한다. 현재 튜토리얼 기본 규칙에는 반영하지 않는다.</dd></dl></div></details></div></article>
-<article id="portfolio" class="record"><h3>취급 의류와 추가 서비스 범위</h3><div><p>기본 의류 후보를 정리하고, 다림질을 해금한 뒤 간단한 바지 수선을 열어가는 안을 제안했다. 품목 구성과 해금 순서는 결정 전이다.</p><details><summary>후보 품목과 단계별 서비스</summary><div class="inside"><dl><dt>초반 후보</dt><dd>셔츠·티셔츠·청바지·면바지를 중심으로 주문을 구성한다. 이 중 실제 주요 취급 품목과 주문 비중은 정해야 한다.</dd><dt>추가 후보</dt><dd>니트·스웨터, 치마·원피스, 재킷·정장은 옷감·취급표시·다림질 차이를 활용할 수 있다. 도입 순서는 미정이다.</dd><dt>후반 후보</dt><dd>야구·축구 유니폼은 특수 얼룩을 다루는 구단 의뢰로, 이불·커튼은 큰 세탁물로 검토한다.</dd><dt>패딩</dt><dd>세탁과 건조 규칙을 더 고민할 품목으로 보류한다.</dd><dt>수선 해금안</dt><dd>다림질을 익힌 뒤 간단한 바지 기장 수선을 해금하는 안이다. 단추 달기와 찢어진 곳 꿰매기는 후속 후보이며, 미니게임·가격·재료는 미정이다.</dd></dl></div></details></div></article>
+<article id="detergent" class="record"><header><h3>손세탁 코스 효과와 특수 의뢰 구상</h3><p class="tags"><span class="tag">이야기 중</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header><div><p>빨기 등 손세탁 전반에 동작 이펙트를 적용하고, 용도별 세제와 스포츠 구단 의뢰를 확장 아이디어로 제안했다. 구체 효과와 진행 방식은 미정이다.</p><details><summary>보류 중인 확장 아이디어</summary><div class="inside"><dl><dt>이펙트</dt><dd>털기뿐 아니라 빨기 등 모든 손세탁 코스에서 입력과 결과가 보이는 애니메이션·효과를 적용하는 구상이다. 크게 빨기에서 방향키를 틀리면 캐릭터가 살짝 미끄러지는 짧은 반응도 후보로 나왔다. 리듬히어로처럼 실수를 즉시 알아차리는 피드백을 참고하며, 반복 여부와 길이는 미정이다.</dd><dt>세제</dt><dd>울 전용, 일반 중성, 스포츠 의류용 세제로 나누는 안이다. 각 세제의 옷감 적합성, 흙·잔디 등 오염별 효과와 비용은 미정이다.</dd><dt>구단 의뢰</dt><dd>야구·축구 구단의 유니폼은 흙이나 잔디 오염이 심해 기계 세탁 후에도 때가 남고, 기계 세탁에 손빨래를 더하는 특수 주문으로 구상한다. 의뢰 소개에 유명 선수 미션을 연결하는 예시도 나왔으며 채택 여부는 미정이다.</dd><dt>후속 검토</dt><dd>등장 시점, 주문 난이도와 보상, 특정 인물 연계 가능성을 정한다. 현재 튜토리얼 기본 규칙에는 반영하지 않는다.</dd></dl></div></details></div></article>
+<article id="portfolio" class="record"><header><h3>취급 의류와 추가 서비스 범위</h3><p class="tags"><span class="tag">이야기 중</span><a class="tag dash" href="#stage-6">06 규칙과 숫자</a></p></header><div><p>기본 의류 후보를 정리하고, 다림질을 해금한 뒤 간단한 바지 수선을 열어가는 안을 제안했다. 품목 구성과 해금 순서는 결정 전이다.</p><details><summary>후보 품목과 단계별 서비스</summary><div class="inside"><dl><dt>초반 후보</dt><dd>셔츠·티셔츠·청바지·면바지를 중심으로 주문을 구성한다. 이 중 실제 주요 취급 품목과 주문 비중은 정해야 한다.</dd><dt>추가 후보</dt><dd>니트·스웨터, 치마·원피스, 재킷·정장은 옷감·취급표시·다림질 차이를 활용할 수 있다. 도입 순서는 미정이다.</dd><dt>후반 후보</dt><dd>야구·축구 유니폼은 특수 얼룩을 다루는 구단 의뢰로, 이불·커튼은 큰 세탁물로 검토한다.</dd><dt>패딩</dt><dd>세탁과 건조 규칙을 더 고민할 품목으로 보류한다.</dd><dt>수선 해금안</dt><dd>다림질을 익힌 뒤 간단한 바지 기장 수선을 해금하는 안이다. 단추 달기와 찢어진 곳 꿰매기는 후속 후보이며, 미니게임·가격·재료는 미정이다.</dd></dl></div></details></div></article>
+  </div>
 </section>
-<section id="history"><div class="heading"><h2>저장 이력</h2></div>
+
+<!-- ============ 남은 질문 ============ -->
+<section class="view" id="questions" data-view data-title="남은 질문">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="kicker">아직 정하지 않은 것</p>
+    <h1>남은 질문</h1>
+  </div>
+  <p class="plain">장부 곳곳에 '보류', '시험값', '협의', '미정'으로 적힌 것을 한곳에 모았어요. 누가 언제 정하는지에 따라 다섯 묶음으로 나눴어요. 정해지면 여기서 지우고 장부에 적어요.</p>
+
+  <div class="qgroup">
+    <h3>지금 정할 것 <a class="tag solid" href="#stage-2">02 단계</a></h3>
+    <ul class="qlist">
+      <li><span>게임이 무엇을 이루면 끝나는가. <a href="#stage-2">02 목표와 기둥</a></span></li>
+      <li><span>돈이 바닥났을 때, 세탁기 압류보다 더 나빠지면 어떻게 되는가. <a href="#stage-2">02 목표와 기둥</a></span></li>
+      <li><span>이 게임이 끝까지 지킬 기둥 세 가지. <a href="#stage-2">02 목표와 기둥</a></span></li>
+      <li><span>플레이어가 느끼길 바라는 기분 한 줄. <a href="#stage-1">01 한 줄 소개</a></span></li>
+      <li><span>누가 좋아할 게임인가, 닮고 싶은 게임은 무엇인가. <a href="#stage-1">01 한 줄 소개</a></span></li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>기획자가 고를 것</h3>
+    <ul class="qlist">
+      <li><span>부분 얼룩을 지우는 조작. 후보는 두더지 잡기, 짝 맞추기, 비눗방울 연쇄 반응이다. <a href="#wash">손빨래와 부분 얼룩</a></span></li>
+      <li><span>털기 판정을 퍼펙트·굿·미스 3단계로 할지, 굿·미스 2단계로 할지. <a href="#wring">짜고 털기</a></span></li>
+      <li><span>마감 직전에 완료한 주문을 손님이 언제 찾아가는가. 주문한 물품은 언제 도착하는가. <a href="#day">하루 운영</a></span></li>
+      <li><span>물품을 상자째 둘지, 선반에 종류별로 놓을지. <a href="#stock">재고와 발주</a></span></li>
+      <li><span>급할 때 비싼 당일 구매를 허용할지. <a href="#stock">재고와 발주</a></span></li>
+      <li><span>성장 다섯 단계의 순서. <a href="#growth">성장 단계</a></span></li>
+      <li><span>카지노의 해금 조건과 판돈. 기둥이 정해지면 넣을지부터 다시 본다. <a href="#growth">성장 단계</a></span></li>
+      <li><span>세제 종류마다 맞는 옷감과 오염, 효과와 비용. <a href="#detergent">세제와 특수 의뢰</a></span></li>
+      <li><span>구단 의뢰를 넣을지. 넣는다면 등장 시점과 난이도, 보상. <a href="#detergent">세제와 특수 의뢰</a></span></li>
+      <li><span>손세탁 이펙트를 어느 동작에 넣을지. <a href="#detergent">세제와 특수 의뢰</a></span></li>
+      <li><span>처음에 받을 옷의 구성과 주문 비중, 새 옷을 들이는 순서. <a href="#portfolio">의류와 수선</a></span></li>
+      <li><span>패딩의 세탁과 건조 규칙. <a href="#portfolio">의류와 수선</a></span></li>
+      <li><span>바지 수선의 미니게임, 가격, 재료. <a href="#portfolio">의류와 수선</a></span></li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>시제품을 해 봐야 정해지는 것 <a class="tag" href="#stage-4">04 단계</a></h3>
+    <ul class="qlist">
+      <li><span>방향키 개수와 제한 시간. 지금은 첫 셔츠 8개, 이후 7~10개다. <a href="#wash">손빨래와 부분 얼룩</a></span></li>
+      <li><span>안전하게 짜는 횟수와 과하게 짰을 때의 손상. 지금은 면 6회, 섬세한 옷 5회다. <a href="#wring">짜고 털기</a></span></li>
+      <li><span>크게 빨기가 세탁 품질에서 차지하는 비중. 지금은 30%다. <a href="#quality">품질 평가</a></span></li>
+      <li><span>첫 셔츠의 건조 시간, 건조 도구를 겹쳐 쓸 때의 효과, 급행 납기의 여유. <a href="#shop">1호점으로</a></span></li>
+      <li><span>방향키를 틀렸을 때 캐릭터가 미끄러지는 연출을 매번 할지, 얼마나 짧게 할지. <a href="#detergent">세제와 특수 의뢰</a></span></li>
+      <li><span>손작업이 2건 이상 밀리면 구인 안내를 띄우는 기준. <a href="#staff">직원 배치</a></span></li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>개발자와 함께 정할 것</h3>
+    <ul class="qlist">
+      <li><span>작업 기록 방식. 입력 순번을 남길지, 횟수와 결과만 남길지. <a href="#quality">품질 평가</a></span></li>
+      <li><span>첫 후기를 별점과 한 줄 평으로 보여 줄지. <a href="#quality">품질 평가</a></span></li>
+      <li><span>환불과 변상이 생기는 조건과 금액. <a href="#quality">품질 평가</a></span></li>
+      <li><span>월세가 밀렸을 때 기계 처분과 남은 금액 이월. <a href="#growth">성장 단계</a></span></li>
+    </ul>
+  </div>
+
+  <div class="qgroup">
+    <h3>숫자를 넣을 때 정할 것 <a class="tag" href="#stage-6">06 단계</a></h3>
+    <ul class="qlist">
+      <li><span>모든 금액. 세탁료, 급행료, 다림질 추가금, 소모품과 장비 가격, 보증금과 월세, 이자, 공과금, 변상액. <a href="#stage-6">06 규칙과 숫자</a></span></li>
+      <li><span>소모품비, 매장 요금, 보증금의 균형. <a href="#shop">1호점으로</a></span></li>
+      <li><span>첫 직원의 임금과 직원 수. 지금 후보는 1명, 2~3명, 4~5명이다. <a href="#staff">직원 배치</a></span></li>
+      <li><span>중고 세탁기의 가격과 상태 차이. <a href="#stock">재고와 발주</a></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 용어 풀이 ============ -->
+<section class="view" id="words" data-view data-title="용어">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="kicker">낯선 말을 한 줄로</p>
+    <h1>용어 풀이</h1>
+  </div>
+  <p class="plain">기획 이야기에 자주 나오는 말이에요. 본문에서 점선 밑줄이 그어진 낱말을 누르면 이 풀이가 바로 떠요.</p>
+  <dl class="words">
+    <div id="w-loop"><dt>핵심 루프</dt><dd>플레이어가 게임에서 계속 되풀이하는 행동의 동그라미. 이 게임에서는 '주문을 받고, 빨고, 말리고, 돌려주고, 돈을 받는다'예요.</dd></div>
+    <div id="w-pillar"><dt>기둥</dt><dd>이 게임이 끝까지 지킬 약속 서너 가지. 새 아이디어를 넣을지 뺄지 정하는 기준이 돼요.</dd></div>
+    <div id="w-proto"><dt>시제품 (프로토타입)</dt><dd>재미가 있는지 확인하려고 작게 만들어 보는 것. 그림이나 소리가 없어도 되고, 확인이 끝나면 버려도 돼요.</dd></div>
+    <div id="w-playtest"><dt>플레이테스트</dt><dd>다른 사람에게 시켜 보고 어디서 막히는지 지켜보는 일.</dd></div>
+    <div id="w-system"><dt>시스템</dt><dd>같은 목적을 가진 규칙의 묶음. 주문, 건조, 후기가 각각 하나의 시스템이에요.</dd></div>
+    <div id="w-state"><dt>상태값</dt><dd>게임 속 물건이 지닌 숫자. 옷의 물기 30%, 건조도 60% 같은 것.</dd></div>
+    <div id="w-resource"><dt>자원</dt><dd>생기고 쓰이는 것. 이 게임에서는 돈, 체력, 건조 칸이에요.</dd></div>
+    <div id="w-sourcesink"><dt>버는 곳과 쓰는 곳 (소스와 싱크)</dt><dd>자원이 생기는 곳과 사라지는 곳. 세탁료는 버는 곳이고 월세는 쓰는 곳이에요.</dd></div>
+    <div id="w-feedback"><dt>고리 (피드백 루프)</dt><dd>결과가 다시 원인이 되는 흐름. 잘 빨면 평판이 오르고, 평판이 오르면 주문이 늘어요.</dd></div>
+    <div id="w-balance"><dt>밸런스</dt><dd>너무 쉽지도 어렵지도 않게 숫자를 맞추는 일.</dd></div>
+    <div id="w-trial"><dt>시험값</dt><dd>일단 넣어 본 숫자. 해 보고 바꿀 거예요.</dd></div>
+    <div id="w-draft"><dt>가안</dt><dd>임시로 정한 안. 더 좋은 안이 나오면 바뀌어요.</dd></div>
+    <div id="w-intent"><dt>기획 의도</dt><dd>이 규칙을 왜 넣는지. 적어 두면 개발자가 이유를 묻지 않아도 돼요.</dd></div>
+    <div id="w-exception"><dt>예외 처리</dt><dd>예상한 흐름대로 안 될 때 어떻게 할지. 돈이 모자라면, 건조 칸이 꽉 찼으면.</dd></div>
+    <div id="w-done"><dt>완료 기준</dt><dd>무엇이 되면 다 만든 것인지 정한 조건. 원문의 '개발자 확인 기준'이 이것이에요.</dd></div>
+    <div id="w-unlock"><dt>해금</dt><dd>조건을 채우면 새 기능이 열리는 것. 다림질을 익히면 바지 수선이 열리는 식이에요.</dd></div>
+    <div id="w-slice"><dt>첫 제작 범위 (버티컬 슬라이스)</dt><dd>게임의 짧은 한 구간을 진짜 품질로 끝까지 만든 것.</dd></div>
+    <div id="w-wire"><dt>화면 스케치 (와이어프레임)</dt><dd>화면에 무엇이 어디 있는지 선과 상자로만 그린 그림.</dd></div>
+    <div id="w-flow"><dt>흐름도 (플로우차트)</dt><dd>어디서 갈라지고 어디서 끝나는지 상자와 화살표로 그린 그림.</dd></div>
+    <div id="w-table"><dt>숫자 표 (데이터 테이블)</dt><dd>가격, 시간 같은 숫자를 모아 둔 표. 나중에 고치기 쉽게 따로 빼 둬요.</dd></div>
+    <div id="w-tutorial"><dt>튜토리얼</dt><dd>게임 방법을 배우는 처음 구간. 이 게임에서는 집에서 보내는 첫 일주일이에요.</dd></div>
+    <div id="w-minigame"><dt>미니게임</dt><dd>큰 게임 안의 짧은 게임. 방향키로 빨기, 스페이스바로 짜기가 미니게임이에요.</dd></div>
+    <div id="w-cutscene"><dt>컷신</dt><dd>조작 없이 보는 짧은 장면.</dd></div>
+  </dl>
+</section>
+
+<!-- ============ 저장 이력: 새 기록은 맨 위에 ============ -->
+<section class="view" id="history" data-view data-title="저장 이력">
+  <p class="crumb"><a href="#home">기획 지도</a></p>
+  <div>
+    <p class="kicker">언제 무엇이 바뀌었나</p>
+    <h1>저장 이력</h1>
+  </div>
+  <div>
+<article class="log">
+  <time datetime="2026-11-26">2026. 11. 26.</time>
+  <div><h3>장부를 길잡이형으로 다시 짰다</h3>
+  <p>기획 순서 다섯 칸을 여덟 단계 지도로 바꿨다. 단계를 누르면 무엇을 정하는 곳인지, 지금까지 정한 것과 남은 것이 나온다. 기획 내용은 그대로 두고 자리만 옮겼다.</p>
+  <details><summary>이번에 달라진 것</summary><div class="inside">지금 할 곳을 02 목표와 기둥으로 표시했다. 게임의 끝과 기둥이 아직 적혀 있지 않아서다. 한 벌의 여정과 시스템 지도 초안, 남은 질문 모음, 용어 풀이를 추가했다. 상태는 색 대신 동그라미가 찬 정도로 보여 준다. 장부 원본은 저장소 맨 위 index.html로 정했다.</div></details></div>
+</article>
 <article class="log">
   <time datetime="2026-11-25">2026. 11. 25.</time>
   <div><h3>1호점 하루 운영과 직원 배치를 한 장부에 연결</h3>
   <p>개점부터 청소·발주까지의 하루, 장비 투자와 고용 흐름을 모았다. 기획 순서에서 다음 일감과 해당 규칙을 바로 펼쳐 볼 수 있다.</p>
   <details><summary>이번에 바뀐 운영안</summary><div class="inside">직원은 구인구직 창에서 고용한 뒤 업무 칸에 배치한다. 컴퓨터 구매 대신 휴대폰 발주와 선반 보관을 검토한다. 후반 카지노는 사장이 혼자 방문하는 선택 콘텐츠로 정리했다.</div></details></div>
 </article>
-<article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>첫 직원 고용 기준 완화</h3><p>손작업이 2건 이상 밀리면 구인 공고를 선택지로 열고, 자연 건조와 수령 대기는 과부하에서 제외하는 시험안을 기록했다. 직원을 고용하지 않아도 진행할 수 있다.</p></div></article><article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>방향키 오입력 반응 연출 추가</h3><p>크게 빨기에서 틀린 방향키 입력에 캐릭터가 살짝 미끄러지는 짧은 컷인 후보를 보류 아이디어로 기록했다. 반복 여부와 연출 길이는 미정이다.</p></div></article><article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>바지 수선과 취급 의류 후보 추가</h3><p>다림질 이후 간단한 바지 수선을 해금하는 안과 주요 의류 후보를 기록했다. 패딩은 보류하고 품목 구성과 도입 순서는 추후 정한다.</p></div></article>
+<article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>첫 직원 고용 기준 완화</h3><p>손작업이 2건 이상 밀리면 구인 공고를 선택지로 열고, 자연 건조와 수령 대기는 과부하에서 제외하는 시험안을 기록했다. 직원을 고용하지 않아도 진행할 수 있다.</p></div></article>
+<article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>방향키 오입력 반응 연출 추가</h3><p>크게 빨기에서 틀린 방향키 입력에 캐릭터가 살짝 미끄러지는 짧은 컷인 후보를 보류 아이디어로 기록했다. 반복 여부와 연출 길이는 미정이다.</p></div></article>
+<article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>바지 수선과 취급 의류 후보 추가</h3><p>다림질 이후 간단한 바지 수선을 해금하는 안과 주요 의류 후보를 기록했다. 패딩은 보류하고 품목 구성과 도입 순서는 추후 정한다.</p></div></article>
 <article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>손세탁 이펙트·세제·구단 의뢰 확장안 추가</h3><p>모든 손세탁 코스 이펙트, 용도별 세제, 흙·잔디 얼룩이 남는 스포츠 유니폼 의뢰를 보류 아이디어로 기록했다. 구체 효과와 유명 선수 미션 연결은 추후 검토한다.</p></div></article>
 <article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>튜토리얼 털기 애니메이션 아이디어 추가</h3><p>박자 판정에 따라 옷과 물방울 애니메이션을 다르게 하는 안을 보류 아이디어로 저장했다. 3단계 판정과 2단계 판정을 비교하며 선택은 추후 논의한다.</p></div></article>
 <article class="log"><time datetime="2026-11-25">2026. 11. 25.</time><div><h3>집 튜토리얼 정리 · 1호점 첫 영업 기획 시작</h3><p>손빨래 조작과 세탁 품질 기준을 정리했다. 부분 얼룩은 보류하고 작업 기록은 두 안을 유지한다. 다음 논의는 카운터의 첫 방문 주문이다.</p><details><summary>이번에 달라진 내용</summary><div class="inside"><p>마우스로 크게 빨던 동작은 방향키 순서 입력으로, 연타로 털던 동작은 짜기 연타와 털기 리듬으로 바뀌었다. 청결도는 옷감 손상까지 반영하는 세탁 품질로 확장했다.</p></div></details></div></article>
+  </div>
+</section>
+</main>
+<footer><span>세탁소 경영 시뮬레이션 · 기획 장부</span><a href="#top" data-top>맨 위로</a></footer>
 
-</section></main>
-<footer><span>세탁소 경영 시뮬레이션 · 기획 장부</span><a href="#top">맨 위로</a></footer>
+<!-- 점선 밑줄 낱말을 누르면 뜨는 풀이 창. 내용은 용어 풀이 화면에서 가져온다. -->
+<div id="term-pop" popover>
+  <h2 id="term-t"></h2>
+  <p id="term-d"></p>
+  <div class="acts"><button type="button" popovertarget="term-pop" popovertargetaction="hide">닫기</button><a class="btn" href="#words">용어 전체 보기</a></div>
+</div>
+
+<script>
+/* 주소 끝의 #이름에 맞는 화면 하나만 보여 준다. 스크립트가 꺼져 있으면 모든 화면이 차례로 이어져 보인다. */
+(function () {
+  var d = document;
+  var views = [].slice.call(d.querySelectorAll('[data-view]'));
+  if (!views.length) return;
+  d.documentElement.classList.add('js');
+  var navLinks = [].slice.call(d.querySelectorAll('.bar nav a'));
+  var baseTitle = d.title;
+  var pop = d.getElementById('term-pop');
+
+  function viewOf(el) {
+    while (el && el !== d) {
+      if (el.hasAttribute && el.hasAttribute('data-view')) return el;
+      el = el.parentNode;
+    }
+    return null;
+  }
+
+  function go() {
+    var id = '';
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { id = ''; }
+    var home = d.getElementById('home');
+    var target = (id && d.getElementById(id)) || home;
+    var view = viewOf(target) || home;
+    if (!viewOf(target)) target = home;
+
+    views.forEach(function (v) { v.classList.toggle('on', v === view); });
+    var navId = /^stage-/.test(view.id) ? 'home' : view.id;
+    navLinks.forEach(function (a) {
+      if (a.getAttribute('href') === '#' + navId) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    [].forEach.call(d.querySelectorAll('.hit'), function (el) { el.classList.remove('hit'); });
+    d.title = view === home ? baseTitle : view.getAttribute('data-title') + ' · ' + baseTitle;
+    try { if (pop && pop.matches(':popover-open')) pop.hidePopover(); } catch (e) {}
+
+    if (target !== view) {
+      for (var p = target; p && p !== view; p = p.parentNode) {
+        if (p.tagName === 'DETAILS') p.open = true;
+      }
+      if (target.matches('.record, .task, .journey li, .sys > div, .words > div')) target.classList.add('hit');
+      target.scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+  window.addEventListener('hashchange', go);
+  go();
+
+  /* 둘러보기 칸의 개수는 화면에 실제로 있는 항목을 세어 적는다. */
+  var counts = {
+    records: d.querySelectorAll('#ledger .record').length,
+    questions: d.querySelectorAll('#questions .qlist li').length,
+    words: d.querySelectorAll('#words .words > div').length,
+    logs: d.querySelectorAll('#history .log').length
+  };
+  var labels = { records: '주제 {n}개', questions: '질문 {n}개', words: '낱말 {n}개', logs: '기록 {n}번' };
+  [].forEach.call(d.querySelectorAll('[data-count]'), function (el) {
+    var key = el.getAttribute('data-count');
+    if (counts[key]) el.textContent = labels[key].replace('{n}', counts[key]) + ' · ' + el.textContent;
+  });
+
+  /* 낱말 풀이 창 */
+  d.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.term') : null;
+    if (!a || !pop || typeof pop.showPopover !== 'function') return;
+    var entry = d.getElementById(a.getAttribute('href').slice(1));
+    if (!entry) return;
+    e.preventDefault();
+    d.getElementById('term-t').textContent = entry.querySelector('dt').textContent;
+    d.getElementById('term-d').textContent = entry.querySelector('dd').textContent;
+    pop.showPopover();
+  });
+
+  var up = d.querySelector('[data-top]');
+  if (up) up.addEventListener('click', function (e) { e.preventDefault(); window.scrollTo(0, 0); });
+})();
+</script>
 </body>
 </html>
