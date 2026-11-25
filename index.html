@@ -56,6 +56,8 @@ code { font-family: inherit; font-size: .92em; background: var(--wash); border: 
 .js .view.on { display: flex; }
 .view > section { display: flex; flex-direction: column; gap: .9rem; }
 .lead { font-size: 1.1875rem; }
+.pitch { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; max-width: none; font-size: clamp(1.15rem, 3.2vw, 1.4rem); line-height: 1.45; }
+.pitch strong { font-weight: 800; }
 .kicker { font-size: .875rem; font-weight: 700; color: var(--muted); }
 .crumb a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; text-decoration: none; }
 .crumb a::before { content: "←"; margin-right: .4rem; }
@@ -317,7 +319,9 @@ footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5
     <p class="kicker">세탁소 경영 시뮬레이션</p>
     <h1>세탁소 기획 장부</h1>
   </div>
-  <p class="lead">동네 세탁소가 문을 닫자 집에서 이웃의 셔츠를 맡기 시작한다. 손빨래로 번 돈으로 첫 가게를 열고, 어떤 주문과 장비에 투자할지 고르는 경영 게임이다.</p>
+  <!-- 한 줄 개요: 01 단계의 한 줄 소개가 바뀌면 함께 고친다 -->
+  <p class="pitch"><span class="tag solid">이 게임은</span><strong>집에서 손빨래로 시작해 동네 세탁소를 열고 키우는 경영 게임</strong></p>
+  <p>동네 세탁소가 문을 닫자 집에서 이웃의 셔츠를 맡기 시작한다. 손빨래로 번 돈으로 첫 가게를 열고, 어떤 주문과 장비에 투자할지 고르는 경영 게임이다.</p>
 
   <!-- 지금 할 곳: 단계가 바뀌면 이 상자와 아래 지도의 aria-current를 함께 고친다 -->
   <div class="now" id="now">
@@ -406,7 +410,7 @@ footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5
   </figure>
   <div class="cols2">
     <section class="panel"><h2>이미 정한 것</h2><ul class="ticks yes">
-      <li>한 줄 소개. 이 장부 첫 화면의 첫 문단이에요.</li>
+      <li>한 줄 소개. 이 장부 첫 화면 맨 위의 한 줄과 그 아래 문단이에요.</li>
       <li>시작 이야기. 주식 빚과 이자, 그리고 동네에 하나뿐인 세탁소가 문을 닫는 장면이에요.</li>
       <li>조작 방식. WASD, 방향키, 스페이스바를 쓰는 걸 보면 PC에서 하는 게임이에요.</li>
     </ul></section>
